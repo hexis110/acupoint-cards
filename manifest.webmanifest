@@ -1,0 +1,17 @@
+{
+  "name": "针灸穴位记忆卡",
+  "short_name": "穴位记忆卡",
+  "description": "针灸穴位归经与定位记忆：闪卡、测验、填空、默写",
+  "lang": "zh-Hans",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#eef2f0",
+  "theme_color": "#1d5c55",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

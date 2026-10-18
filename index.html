@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>针灸穴位记忆卡</title>
+<meta name="description" content="针灸穴位归经与定位记忆：闪卡、测验、填空、默写">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16201e" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="穴位记忆卡">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: one narrow study column (phone-first), sticky top bar with tabs + meridian scope strip; each meridian carries its own hue chip */
+:root{
+  --bg:#eef2f0; --surface:#ffffff; --sunk:#e3e9e6; --ink:#17221f; --muted:#5a6964; --line:#d3dcd8;
+  --accent:#1d5c55; --accent-ink:#ffffff; --seal:#b0362b; --good:#2b7a4b; --warn:#9a6a12;
+  --chip-l:93%; --chip-c:0.05; --chip-fg-l:36%;
+  --mark:#fde7a8; --miss:#f8d4cf;
+  --f-display:"Noto Serif SC","Songti SC","STSong",serif;
+  --f-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1513; --surface:#16201e; --sunk:#1d2926; --ink:#e2ebe8; --muted:#93a39e; --line:#2a3734;
+  --accent:#6fc3b6; --accent-ink:#0b1412; --seal:#ec8679; --good:#72cf97; --warn:#e2b45c;
+  --chip-l:30%; --chip-c:0.05; --chip-fg-l:86%; --mark:#5a4a14; --miss:#5c2722; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1513; --surface:#16201e; --sunk:#1d2926; --ink:#e2ebe8; --muted:#93a39e; --line:#2a3734;
+  --accent:#6fc3b6; --accent-ink:#0b1412; --seal:#ec8679; --good:#72cf97; --warn:#e2b45c;
+  --chip-l:30%; --chip-c:0.05; --chip-fg-l:86%; --mark:#5a4a14; --miss:#5c2722; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.65}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:720px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-block:12px 4px}
+.brand h1{font-family:var(--f-display);font-size:1.3rem;margin:0;letter-spacing:.04em}
+.brand small{color:var(--muted);font-size:.8rem}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+nav.tabs button{flex:0 0 auto;border:0;background:none;font:inherit;font-size:.95rem;color:var(--muted);padding:8px 12px;border-bottom:2px solid transparent;cursor:pointer}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:700}
+.scope{display:flex;gap:6px;overflow-x:auto;padding-block:8px 10px;scrollbar-width:thin}
+.chip{--h:180;flex:0 0 auto;border:1px solid transparent;border-radius:999px;padding:3px 10px;font:inherit;font-size:.82rem;cursor:pointer;
+  background:oklch(var(--chip-l) var(--chip-c) var(--h));color:oklch(var(--chip-fg-l) 0.11 var(--h));white-space:nowrap}
+.chip.all{background:var(--sunk);color:var(--ink)}
+.chip[aria-pressed="true"]{border-color:currentColor;font-weight:700}
+.chip .n{font-family:var(--f-mono);font-size:.72rem;opacity:.75;margin-left:4px}
+main{padding-block:16px 64px}
+section[hidden]{display:none}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn{font:inherit;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:9px 16px;cursor:pointer}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+.btn.again{border-color:var(--seal);color:var(--seal)}
+.btn.hard{border-color:var(--warn);color:var(--warn)}
+.btn.good{border-color:var(--good);color:var(--good)}
+.btn:disabled{opacity:.45;cursor:default}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.muted{color:var(--muted)}
+.lbl{font-size:.75rem;letter-spacing:.12em;color:var(--muted);font-weight:500}
+h2{font-family:var(--f-display);font-size:1.15rem;margin:0 0 8px;text-wrap:balance}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.code{font-family:var(--f-mono);font-size:.8rem;color:var(--muted)}
+.mtag{--h:180;display:inline-block;border-radius:6px;padding:0 8px;font-size:.8rem;background:oklch(var(--chip-l) var(--chip-c) var(--h));color:oklch(var(--chip-fg-l) 0.11 var(--h))}
+.special{font-size:.8rem;color:var(--seal)}
+/* browse */
+.search{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.plist{display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden}
+.pt{border-top:1px solid var(--line)}
+.pt:first-child{border-top:0}
+.pt>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:3.2em 1fr auto;gap:10px;align-items:baseline;padding:12px 14px}
+.pt>summary::-webkit-details-marker{display:none}
+.pt .no{font-family:var(--f-mono);font-size:.75rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.pt .nm{font-family:var(--f-display);font-size:1.15rem;font-weight:700}
+.pt .loc1{grid-column:2/4;font-size:.9rem;color:var(--muted);margin-top:-6px;min-width:0}
+.pt[open] .loc1{display:none}
+.pt .body{padding:0 14px 14px 14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);display:inline-block}
+.dot.b1,.dot.b2{background:var(--warn)} .dot.b3,.dot.b4,.dot.b5{background:var(--good)}
+.field{display:flex;flex-direction:column;gap:2px}
+.field p{margin:0;white-space:pre-line}
+.locbig{font-size:1.02rem}
+.locbig mark{background:var(--mark);color:inherit;border-radius:3px;padding:0 1px}
+details.steps summary{cursor:pointer;color:var(--accent);font-size:.9rem}
+details.steps p{white-space:pre-line;font-size:.92rem;margin:6px 0 0}
+/* flashcards */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.stat b{display:block;font-family:var(--f-mono);font-size:1.4rem;font-variant-numeric:tabular-nums}
+.stat span{font-size:.8rem;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px 20px;min-height:280px;display:flex;flex-direction:column;gap:14px}
+.card .big{font-family:var(--f-display);font-size:clamp(2.4rem,11vw,3.6rem);font-weight:700;text-align:center;letter-spacing:.08em;line-height:1.2;margin-top:12px}
+.card .prompt{text-align:center;color:var(--muted);font-size:.9rem}
+.progress{height:4px;background:var(--sunk);border-radius:2px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.rate{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.rate .btn{padding:12px 4px;display:flex;flex-direction:column;align-items:center;line-height:1.3}
+.rate .btn small{font-size:.72rem;opacity:.8}
+/* quiz */
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{text-align:left;font:inherit;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:12px 14px;cursor:pointer;line-height:1.5}
+.opt.right{border-color:var(--good);background:color-mix(in oklab,var(--good) 14%,var(--surface))}
+.opt.wrong{border-color:var(--seal);background:color-mix(in oklab,var(--seal) 14%,var(--surface))}
+.opt .nmopt{font-family:var(--f-display);font-size:1.15rem;font-weight:700}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{font:inherit;font-size:.9rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.qtext{font-size:1.05rem}
+.cloze input{font:inherit;font-family:var(--f-mono);font-size:.95rem;width:5.5em;border:0;border-bottom:2px solid var(--accent);background:var(--sunk);color:var(--ink);text-align:center;padding:0 4px;border-radius:4px 4px 0 0}
+.cloze input.ok{border-bottom-color:var(--good);color:var(--good)}
+.cloze input.no{border-bottom-color:var(--seal);color:var(--seal)}
+.cloze .ans{font-family:var(--f-mono);font-size:.8rem;color:var(--good);margin-left:2px}
+/* recall */
+textarea,select{font:inherit;width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--surface);color:var(--ink)}
+textarea{min-height:110px;resize:vertical}
+.diff .miss{background:var(--miss);border-radius:2px;text-decoration:underline wavy var(--seal);text-underline-offset:3px}
+.diff .extra{color:var(--seal);text-decoration:line-through}
+.score{font-family:var(--f-mono);font-size:1.6rem;font-variant-numeric:tabular-nums}
+/* gudu */
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+th,td{text-align:left;padding:9px 12px;border-top:1px solid var(--line);vertical-align:top}
+thead th{border-top:0;font-size:.75rem;letter-spacing:.1em;color:var(--muted);font-weight:500}
+td.cun{font-family:var(--f-mono);white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:500}
+td .note{display:block;font-size:.82rem;color:var(--muted)}
+tr.grp td{background:var(--sunk);font-weight:700;font-size:.82rem;letter-spacing:.1em}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font-size:.88rem;z-index:20}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html,body{margin:0}
+body{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+.backup{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:.85rem}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="brand"><h1>针灸穴位记忆卡</h1><small id="brandCount"></small></div>
+    <nav class="tabs" role="tablist">
+      <button role="tab" data-tab="browse" aria-selected="true">穴位表</button>
+      <button role="tab" data-tab="cards" aria-selected="false">闪卡复习</button>
+      <button role="tab" data-tab="quiz" aria-selected="false">选择测验</button>
+      <button role="tab" data-tab="cloze" aria-selected="false">填空</button>
+      <button role="tab" data-tab="recall" aria-selected="false">默写</button>
+      <button role="tab" data-tab="gudu" aria-selected="false">骨度分寸</button>
+    </nav>
+    <div class="scope" id="scope" aria-label="经脉范围"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="tab-browse" class="stack">
+    <input id="q" class="search" type="search" placeholder="搜索穴名、代号或定位，如：合谷 / LI 4 / 腕横纹上2寸">
+    <div class="muted" id="bcount" style="font-size:.85rem"></div>
+    <div class="plist" id="plist"></div>
+  </section>
+
+  <section id="tab-cards" class="stack" hidden>
+    <div class="stats" id="cstats"></div>
+    <div class="row" style="justify-content:space-between">
+      <span class="muted" style="font-size:.88rem">每次新学 <select id="newPer" style="width:auto;padding:4px 8px"><option>5</option><option selected>10</option><option>15</option><option>20</option></select> 个</span>
+      <button class="btn primary" id="cstart">开始复习</button>
+    </div>
+    <div id="cardArea"></div>
+    <p class="muted" style="font-size:.85rem;margin:0">看到穴名先在心里（或说出口）答出“归经＋定位”，再翻面核对。忘记的会在本轮再出现，记得的按 1→3→7→16→35 天间隔复习。进度只保存在这台设备的浏览器里。</p>
+  </section>
+
+  <section id="tab-quiz" class="stack" hidden>
+    <div class="panel stack" id="quizSetup">
+      <div><div class="lbl">题型</div>
+        <div class="seg" id="qtype">
+          <button data-v="mer" aria-pressed="true">穴名 → 归经</button>
+          <button data-v="name2loc" aria-pressed="false">穴名 → 定位</button>
+          <button data-v="loc2name" aria-pressed="false">定位 → 穴名</button>
+          <button data-v="mix" aria-pressed="false">混合</button>
+        </div></div>
+      <div class="row" style="justify-content:space-between"><span class="muted" style="font-size:.88rem">10 题，干扰项取自相同部位的穴位。答错的穴位会加入闪卡复习。</span><button class="btn primary" id="qstart">开始</button></div>
+    </div>
+    <div id="quizArea"></div>
+  </section>
+
+  <section id="tab-cloze" class="stack" hidden>
+    <div class="panel"><h2>定位填空</h2><p class="muted" style="margin:0;font-size:.9rem">考试最容易失分的是数字和骨性标志：几寸、第几肋间隙、第几椎。填入空白处，按“核对”。数字范围用“～”，如 0.5～0.8寸。</p></div>
+    <div id="clozeArea"></div>
+  </section>
+
+  <section id="tab-recall" class="stack" hidden>
+    <div class="panel"><h2>默写定位</h2><p class="muted" style="margin:0;font-size:.9rem">模拟口述或笔试：选出归经，写出定位原文，再逐字对比。标红波浪线的是漏写或写错的字。</p></div>
+    <div id="recallArea"></div>
+  </section>
+
+  <section id="tab-gudu" class="stack" hidden>
+    <div class="panel"><h2>全身主要骨度折量寸</h2><p class="muted" style="margin:0;font-size:.9rem">定位里的“几寸”都从这里折量出来。先背熟这张表，定位中的数字就有了依据。</p></div>
+    <div class="tw"><table><thead><tr><th>起止点</th><th>骨度</th></tr></thead><tbody id="gudu"></tbody></table></div>
+    <div class="panel stack" style="font-size:.92rem">
+      <div class="lbl">取穴要点（摘自讲义）</div>
+      <div>手三阴经前臂 12 寸：太渊至尺泽、大陵至曲泽、神门至少海。</div>
+      <div>手三阳经前臂 12 寸：阳溪至曲池、阳池至肘尖、阳谷至小海。</div>
+      <div>背部 3 寸、1.5 寸：两肩胛冈内侧端之间为 6 寸，折半为 3 寸，再折半为 1.5 寸。</div>
+      <div>腹部 4 寸、2 寸：男性两乳头之间 8 寸，折半为 4 寸，再折半为 2 寸。</div>
+      <div>量绳只折到 2～3 寸，2～3 寸以内用等分法；遇奇数寸（如 9 寸）先减 0.5 或 1 寸同身寸再折。</div>
+    </div>
+    <div class="panel stack">
+      <div class="lbl">学习进度备份</div>
+      <p class="muted" style="margin:0;font-size:.88rem">进度保存在本机。换设备或清除浏览器数据前，先导出备份文件，再在新设备上导入。</p>
+      <div class="backup"><button class="btn" id="bexport">导出进度</button><label class="btn" for="bimport" style="cursor:pointer">导入进度</label><input type="file" id="bimport" accept="application/json,.json" hidden><button class="btn again" id="breset">清空进度</button></div>
+      <div class="muted code" id="ver"></div>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const P = [{"no":1,"name":"中府","meridian":"手太阴肺经","code":"LU 1","special":"肺之募穴","loc":"在胸部，横平第1肋间隙，锁骨下窝外侧，前正中线旁开6寸。","steps":"1. 正坐位或仰卧位。\n2. 找第1肋间隙：由胸骨上窝沿胸骨往下触摸，摸到一个凸起为胸骨角，胸骨角横平第2肋，第2肋骨上之间隙即为第1肋间隙。\n3. 将量绳两端分别放在两侧肩胛骨喙突上，折半为6寸。\n4. 在胸壁外上方，锁骨外端下窝，横平第1肋间隙（水平线），前正中线旁开6寸处取穴。\n注：建议采仰卧位。","op":"向外斜刺或平刺0.5～0.8寸，不可向内下深刺，以免伤及肺脏，引起气胸。"},{"no":2,"name":"尺泽","meridian":"手太阴肺经","code":"LU 5","special":"合穴","loc":"在肘区，肘横纹上，肱二头肌腱桡侧缘凹陷中。","steps":"1. 正坐或仰卧位。\n2. 仰掌微屈肘，暴露肘部肱二头肌腱及肘横纹。\n3. 在肘横纹上，肱二头肌腱桡侧缘取穴。","op":"直刺0.8～1.2寸，或点刺出血。"},{"no":3,"name":"孔最","meridian":"手太阴肺经","code":"LU 6","special":"郄穴","loc":"在前臂前区，腕掌侧远端横纹上7寸，尺泽与太渊连线上。","steps":"1. 正坐位或仰卧位。\n2. 伸臂仰掌，先确定尺泽与太渊穴位置，并将量绳两端分别放在尺泽与太渊穴上取12寸，12寸折半为6寸，6寸再折半为3寸取9寸，在6寸与9寸之间分3等分取7寸。\n3. 在尺泽与太渊穴的连线上，腕掌侧远端横纹上7寸处取穴。","op":"直刺0.5～1寸。"},{"no":4,"name":"列缺","meridian":"手太阴肺经","code":"LU 7","special":"络穴，八脉交会穴（通于任脉）","loc":"在前臂，腕掌侧远端横纹上1.5寸，拇短伸肌腱和拇长展肌腱之间，拇长展肌腱沟的凹陷中。","steps":"1. 正坐位或仰卧位，侧掌。\n2. 先确定腕掌侧远端横纹与肘横纹，并将量绳两端分别放在腕横纹与肘横纹上取12寸，12寸折半为6寸，6寸再折半为3寸，3寸再折半为1.5寸。\n3. 在桡骨茎突上，腕掌侧远端横纹上1.5寸凹沟处取穴。\n简便取穴法：以左右两手虎口交叉，以手食指放在另一手的桡骨茎突上，当食指尖到达之凹陷处是穴。","op":"向上斜刺0.5～0.8寸。"},{"no":5,"name":"太渊","meridian":"手太阴肺经","code":"LU 9","special":"输穴，肺之原穴，八会穴之脉会","loc":"在腕前区，桡骨茎突与舟状骨之间，拇长展肌腱尺侧凹陷中。","steps":"1. 正坐位或仰卧位，仰掌。\n2. 腕掌侧远端横纹桡侧，可触摸到桡动脉搏动。\n3. 在动脉桡侧缘，桡骨茎突与舟状骨之间的凹陷中取穴。","op":"避开桡动脉，直刺0.3～0.5寸。"},{"no":6,"name":"鱼际","meridian":"手太阴肺经","code":"LU 10","special":"荥穴","loc":"在手外侧，第1掌骨桡侧中点赤白肉际处。","steps":"1. 正坐位或仰卧位，侧掌微握拳。\n2. 第1掌骨中点：从第1掌指关节高点处，沿第1掌骨向上推至骨上端后，确定中点。\n3. 第1掌骨中点骨边赤白肉际处取穴。","op":"直刺0.5～0.8寸。治小儿疳积可用割治法。"},{"no":7,"name":"少商","meridian":"手太阴肺经","code":"LU 11","special":"井穴","loc":"在手指，拇指末节桡侧，指甲根角侧上方0.1寸（指寸）。","steps":"1. 侧掌微握拳，拇指在上。\n2. 沿拇指指甲根部基底缘划条横线，再沿拇指指甲桡侧缘划条直线，两条线交点处（即是拇指桡侧指甲根角处）取穴。（见取穴原则说明第25点）","op":"浅刺0.1寸，或点刺出血。"},{"no":8,"name":"商阳","meridian":"手阳明大肠经","code":"LI 1","special":"井穴","loc":"在手指，食指末节桡侧，指甲根角侧上方0.1寸（指寸）。","steps":"1. 正坐位或仰卧位，俯掌。\n2. 食指末节桡侧，指甲根角上方0.1寸。（见取穴原则说明第25点）","op":"浅刺0.1寸，或点刺出血。"},{"no":9,"name":"合谷","meridian":"手阳明大肠经","code":"LI 4","special":"大肠之原穴","loc":"在手背，第2掌骨桡侧的中点处。","steps":"1. 正坐位或仰卧位，手半握拳侧置。\n2. 找第2掌骨中点：从第2掌指关节最高点沿第2掌骨向上推至上端后即为第2掌骨长度。\n3. 确定中点。\n4. 在第2掌骨中点桡侧骨边取穴。","op":"直刺0.5～1寸，针刺时手呈半握拳状。孕妇不宜针。"},{"no":10,"name":"阳溪","meridian":"手阳明大肠经","code":"LI 5","special":"经穴","loc":"在腕区，腕背侧远端横纹桡侧，桡骨茎突远端，解剖学“鼻烟窝”凹陷中。","steps":"1. 正坐位或仰卧位，侧腕屈肘。\n2. 拇指上翘用力背伸，显露拇长伸肌腱与拇短伸肌腱。\n3. 在腕背侧远端横纹上，桡骨茎突下端，两筋间凹陷处（鼻烟窝）取穴。","op":"直刺或斜刺0.5～0.8寸。"},{"no":11,"name":"偏历","meridian":"手阳明大肠经","code":"LI 6","special":"络穴","loc":"在前臂，腕背侧远端横纹上3寸，阳溪与曲池连线上。","steps":"1. 正坐或仰卧位，屈肘，掌心向胸。\n2. 先确定阳溪与曲池穴的位置。\n3. 将量绳两端分别放在阳溪与曲池穴上取12寸，12寸折半为6寸，6寸再折半即为3寸。\n4. 在阳溪与曲池的连线上，阳溪穴（即腕背侧远端横纹）上3寸处取穴。","op":"直刺或斜刺0.5～0.8寸。"},{"no":12,"name":"手三里","meridian":"手阳明大肠经","code":"LI 10","special":"","loc":"在前臂，肘横纹下2寸，阳溪与曲池连线上。","steps":"1. 正坐位或仰卧位，屈肘掌心向胸。\n2. 先确定阳溪与曲池穴的位置。\n3. 将量绳两端分别放在阳溪与曲池穴上取12寸，12寸折半为6寸，6寸再折半为3寸，在曲池与3寸位置分3等分取2寸。（见取穴方法1）\n4. 在阳溪与曲池连线上，曲池穴（即肘横纹）下2寸处取穴。","op":"直刺1～1.5寸。"},{"no":13,"name":"曲池","meridian":"手阳明大肠经","code":"LI 11","special":"合穴","loc":"在肘区，在尺泽与肱骨外上髁连线中点凹陷处。","steps":"1. 正坐位或仰卧位，屈肘。\n2. 先确定尺泽穴位置，再触摸肱骨外上髁最高点。\n3. 在尺泽与肱骨外上髁连线中点凹陷处取穴。","op":"直刺1～1.5寸。"},{"no":14,"name":"臂臑","meridian":"手阳明大肠经","code":"LI 14","special":"","loc":"在臂部，曲池上7寸，三角肌前缘处。","steps":"1. 正坐位，垂臂。\n2. 屈肘，上臂内收显露肘横纹头与腋前纹头。\n3. 将量绳两端分别放在肘横纹（曲池穴）与腋前纹头水平线上取9寸。\n4. 将9寸折半为4.5寸，加0.5寸（拇指同身寸的一半）为5寸，在5寸与9寸之间再折半为2寸，加下面的5寸即为7寸。\n5. 握拳用力手臂平举显露三角肌。\n6. 在曲池上7寸，三角肌前缘取穴。","op":"直刺或向上斜刺0.8～1.5寸。"},{"no":15,"name":"肩髃","meridian":"手阳明大肠经","code":"LI 15","special":"","loc":"在三角肌区，肩峰外侧缘前端与肱骨大结节两骨间凹陷中。","steps":"1. 正坐位垂肩。\n2. 屈肘抬臂外展时肩峰外侧缘出现两个凹陷，前下方的凹陷即是肩髃穴。\n备注：找肩峰外侧前端，可顺着肩胛冈向外触摸至肩部转角处（肩峰角），继续向前触摸至前端，即为肩峰外侧缘前端，穴在肩峰外侧缘前端与肱骨大结节两骨间凹陷中。","op":"直刺或向下斜刺0.8～1.5寸。肩周炎宜向肩关节方向直刺，上肢不遂宜向三角肌方向斜刺。"},{"no":16,"name":"扶突","meridian":"手阳明大肠经","code":"LI 18","special":"","loc":"在胸锁乳突肌区，横平喉结，胸锁乳突肌前、后缘中间。","steps":"1. 正坐位或仰卧位。\n2. 找喉结：头微仰显露并触摸颈部正中偏下方的突起部分，即为喉结。\n3. 从喉结处顺着颈纹斜上至胸锁乳突肌前后缘中间的肌腹中取穴。\n备注：头转向对侧显露胸锁乳突肌。","op":"直刺0.5～0.8寸。注意避开颈动脉，不可过深。一般不使用电针，以免引起迷走神经中枢反应。"},{"no":17,"name":"迎香","meridian":"手阳明大肠经","code":"LI 20","special":"","loc":"在面部，鼻翼外缘中点旁，鼻唇沟中。","steps":"1. 正坐位或仰卧位。\n2. 在与鼻翼外缘中点平齐的鼻唇沟中取穴。","op":"略向内上方斜刺或平刺0.3～0.5寸。"},{"no":18,"name":"承泣","meridian":"足阳明胃经","code":"ST 1","special":"","loc":"在面部，眼球与眶下缘之间，目正视，瞳孔直下。","steps":"1. 正坐位或仰卧位。\n2. 两目正视，瞳孔直下，当眼球与眶下缘之间取穴（即目眶骨上陷中）。","op":"以左手拇指向上轻推眼球，紧靠眶缘缓慢直刺0.5～1.5寸，不宜提插捻转，以防刺破血管引起血肿。出针时按压针孔片刻，以防出血。"},{"no":19,"name":"四白","meridian":"足阳明胃经","code":"ST 2","special":"","loc":"在面部，眶下孔处。","steps":"1. 正坐位或仰卧位。\n2. 两目正视，瞳孔直下，当眶下孔凹陷处。","op":"直刺或微向上斜刺0.3～0.5寸，不可深刺，以免伤及眼球，不可过度提插捻转。"},{"no":20,"name":"地仓","meridian":"足阳明胃经","code":"ST 4","special":"","loc":"在面部，口角旁开0.4寸（指寸）。","steps":"1. 正坐位或仰卧位。\n2. 口角旁0.4寸（患者拇指同身寸）取穴。","op":"斜刺或平刺0.5～0.8寸。可向颊车穴透刺。"},{"no":21,"name":"颊车","meridian":"足阳明胃经","code":"ST 6","special":"","loc":"在面部，下颌角前上方一横指（中指），闭口咬紧牙时咬肌隆起，放松时按之有凹陷处。","steps":"1. 正坐位或仰（侧）卧位。\n2. 在下颌角前上方约一横指凹陷中，上下齿咬紧时，在隆起的咬肌高点处。","op":"直刺0.3～0.5寸，或平刺0.5～1寸。可向地仓穴透刺。"},{"no":22,"name":"下关","meridian":"足阳明胃经","code":"ST 7","special":"","loc":"在面部，颧弓下缘中央与下颌切迹之间凹陷中。","steps":"1. 正坐位或仰（侧）卧位。\n2. 找颧弓及颧弓下凹陷：从颧骨向外上触摸至最高点即为颧弓。颧弓下缘的凹陷是由颧弓与下颌切迹所形成。\n3. 张口时下颌骨髁状突前移，凹陷消失。\n4. 在颧弓下缘与下颌切迹之间的凹陷中闭口取穴。","op":"直刺0.5～1寸。留针时不可做张口动作，以免弯针、折针。"},{"no":23,"name":"头维","meridian":"足阳明胃经","code":"ST 8","special":"","loc":"在头部，额角发际直上0.5寸，头正中线旁开4.5寸。","steps":"1. 正坐位或仰卧位。\n2. 将前额头发向上推举，显露出前发际及额角。\n3. 当鬓发前缘直上额之发际角上0.5寸（患者拇指同身寸），头正中线（神庭）旁开4.5寸处取穴。","op":"平刺0.5～1寸。"},{"no":24,"name":"人迎","meridian":"足阳明胃经","code":"ST 9","special":"","loc":"在颈部，横平喉结，胸锁乳突肌前缘，颈总动脉搏动处。","steps":"1. 正坐位或仰卧位，侧颈。\n2. 找喉结：头微仰，显露颈部正中偏下突起的部分，即为喉结。\n3. 横平喉结，在胸锁乳突肌的前缘（头转向对侧可显露胸锁乳突肌），颈总动脉搏动处。\n注：触及动脉处是穴。针刺时避开动脉。","op":"避开颈总动脉，直刺0.3～0.8寸。"},{"no":25,"name":"梁门","meridian":"足阳明胃经","code":"ST 21","special":"","loc":"在上腹部，脐中上4寸，前正中线旁开2寸。","steps":"1. 仰卧位。\n2. 先找脐上4寸：胸剑联合至脐中为8寸，折半即为4寸（中脘）。\n3. 前正中线旁开2寸：两乳头之间为8寸，折半为4寸，再折半即为2寸。\n4. 脐中上4寸，前正中线旁开2寸处取穴。\n参考：可依据锁骨长8寸，折半为4寸，再折半为2寸取穴。（余同）","op":"直刺0.8～1.2寸。过饱者禁针，肝大者右侧慎针或禁针，不宜做大幅度提插。"},{"no":26,"name":"天枢","meridian":"足阳明胃经","code":"ST 25","special":"大肠之募穴","loc":"在腹部，横平脐中，前正中线旁开2寸。","steps":"1. 仰卧位。\n2. 在脐中旁开2寸处取穴。（两乳头之间为8寸，折半为4寸，再折半即为2寸。）","op":"直刺1～1.5寸。"},{"no":27,"name":"水道","meridian":"足阳明胃经","code":"ST 28","special":"","loc":"在下腹部，脐中下3寸，前正中线旁开2寸。","steps":"1. 仰卧位。\n2. 先找脐中下3寸：脐中至耻骨联合上缘为5寸，折半为2.5寸，加0.5寸（患者拇指同身寸）即为3寸（关元）。\n3. 前正中线旁开2寸：两乳头之间为8寸，折半为4寸，再折半即为2寸。\n4. 脐中下3寸，前正中线旁开2寸处取穴。","op":"直刺1～1.5寸。"},{"no":28,"name":"归来","meridian":"足阳明胃经","code":"ST 29","special":"","loc":"在下腹部，脐中下4寸，前正中线旁开2寸。","steps":"1. 仰卧位。\n2. 先找脐中下4寸：脐中至耻骨联合上缘为5寸，折半为2.5寸，加0.5寸（患者拇指同身寸）为3寸，3寸与耻骨联合上缘中点即为4寸（中极）。\n3. 前正中线旁开2寸：两乳头之间为8寸，折半为4寸，再折半即为2寸。\n4. 脐中下4寸，前正中线旁开2寸处取穴。","op":"直刺1～1.5寸。"},{"no":29,"name":"伏兔","meridian":"足阳明胃经","code":"ST 32","special":"","loc":"在股前区，髌底上6寸，髂前上棘与髌底外侧端的连线上。","steps":"1. 仰卧位。\n2. 侧卧屈腿，显露股骨大转子，触摸高点并将量绳两端分别放在股骨大转子高点与腘横纹上（19寸），减1寸（患者拇指同身寸）为18寸，18寸3等分取6寸。\n3. 仰卧从髂嵴高点沿骨边向前触摸到最向前突的骨即是髂前上棘。\n4. 找髌骨底外上缘。\n5. 在髂前上棘与髌骨外上缘连线上，髌底上6寸处取穴。","op":"直刺1～2寸。"},{"no":30,"name":"梁丘","meridian":"足阳明胃经","code":"ST 34","special":"郄穴","loc":"在股前区，髌底上2寸，股外侧肌与股直肌肌腱之间。","steps":"1. 正坐屈膝或仰卧屈膝。\n2. 在膝髌骨外上缘上2寸（取髌骨底至髌尖为2寸），当股外侧肌与股直肌肌腱之间凹陷中取穴。参考：伸展膝盖用力时，肌肉隆起前的凹陷。","op":"直刺1～1.5寸。说明：建议还是保留屈膝，因为不屈膝，伸直脚，2寸容易出错。"},{"no":31,"name":"犊鼻","meridian":"足阳明胃经","code":"ST 35","special":"","loc":"在膝前区，髌韧带外侧凹陷中。","steps":"1. 正坐位或仰卧位，屈膝。\n2. 触摸髌韧带及韧带外侧的凹陷。\n3. 在凹陷处中取穴。","op":"屈膝，向后内斜刺0.5～1寸。注：未纳入2023年注册考考试大纲内。"},{"no":32,"name":"足三里","meridian":"足阳明胃经","code":"ST 36","special":"合穴，胃下合穴","loc":"在小腿外侧，犊鼻下3寸，胫骨前嵴外1横指处，犊鼻与解溪连线上。","steps":"1. 正坐屈膝或仰卧屈膝。\n2. 在犊鼻穴下3寸（一夫法）（参照患者手指）。\n3. 距胫骨前嵴外侧 1横指（中指横指）（参照患者手指）处取穴。","op":"直刺1～2寸。强壮保健常用温灸法。说明：同前，如果不屈膝，犊鼻取穴不准。所以建议保留屈膝。以下凡是用到犊鼻作为取穴定位的穴位，都建议要屈膝。"},{"no":33,"name":"上巨虚","meridian":"足阳明胃经","code":"ST 37","special":"大肠下合穴","loc":"在小腿外侧，犊鼻下6寸，犊鼻与解溪连线上。","steps":"1. 正坐屈膝或仰卧屈膝。\n2. 犊鼻穴下6寸：腘横纹至外踝尖为16寸，折半为8寸，8寸折半为4寸，4寸再折半为2寸取6寸。\n3. 犊鼻下6寸，犊鼻与解溪连线上。","op":"直刺1～2寸。"},{"no":34,"name":"条口","meridian":"足阳明胃经","code":"ST 38","special":"","loc":"在小腿外侧，犊鼻下8寸，犊鼻与解溪连线上。","steps":"1. 正坐屈膝或仰卧屈膝。\n2. 犊鼻穴下8寸：腘横纹至外踝尖为16寸，折半 即为8寸。\n3. 犊鼻下8寸，犊鼻穴与解溪的连线上。","op":"直刺1～1.5寸。"},{"no":35,"name":"下巨虚","meridian":"足阳明胃经","code":"ST 39","special":"小肠下合穴","loc":"在小腿外侧，犊鼻下9寸，犊鼻与解溪连线上。","steps":"1. 正坐屈膝或仰卧屈膝。\n2. 犊鼻穴下9寸：腘横纹至外踝尖为16寸，折半为8寸，加1寸（患者拇指同身寸）即为9寸。\n3. 犊鼻下9寸，犊鼻与解溪连线上。","op":"直刺1～1.5寸。"},{"no":36,"name":"丰隆","meridian":"足阳明胃经","code":"ST 40","special":"络穴","loc":"在小腿外侧，外踝尖上8寸，胫骨前肌外缘；条口外侧一横指处。","steps":"1. 正坐屈膝或仰卧屈膝。\n2. 先找条口，在犊鼻穴下8寸：腘横纹至外踝尖为16寸，折半即为8寸，犊鼻穴与解溪的连线上即条口。\n3. 条口外侧1横指（患者中指横指）处取穴。","op":"直刺1～1.5寸。"},{"no":37,"name":"解溪","meridian":"足阳明胃经","code":"ST 41","special":"经穴","loc":"在踝区，踝关节前面中央凹陷中，𧿹长伸肌腱与趾长伸肌腱之间。","steps":"1. 正坐位或仰卧位。\n2. 足趾背屈上翘，显露𧿹长伸肌腱与趾长伸肌腱。\n3. 在踝关节前面中央外侧两条肌腱之间凹陷中取穴。","op":"直刺0.5～1寸。"},{"no":38,"name":"内庭","meridian":"足阳明胃经","code":"ST 44","special":"荥穴","loc":"在足背，第2、3趾间，趾蹼缘后方赤白肉际处。","steps":"1. 仰卧伸足。\n2. 第2、3趾间，趾蹼缘后方赤白肉际处。","op":"直刺或斜刺0.5～0.8寸。"},{"no":39,"name":"厉兑","meridian":"足阳明胃经","code":"ST 45","special":"井穴","loc":"在足趾，第2趾末节外侧，趾甲根角侧后方0.1寸（指寸）。","steps":"1. 仰卧伸足。\n2. 在第2趾外侧趾甲根角侧后方0.1寸处取穴。（见取穴原则说明第25点）","op":"12.5&13.5：浅刺0.1寸。14.5：浅刺0.1寸，或点刺出血。"},{"no":40,"name":"隐白","meridian":"足太阴脾经","code":"SP 1","special":"井穴","loc":"在足趾，大趾末节内侧，趾甲根角侧后方0.1寸（指寸）。","steps":"1. 仰卧位伸足。\n2. 在足大趾内侧趾甲根角侧后方0.1寸处取穴。（见取穴原则说明第25点）","op":"浅刺0.1寸。"},{"no":41,"name":"太白","meridian":"足太阴脾经","code":"SP 3","special":"输穴，脾之原穴","loc":"在跖区，第1跖趾关节近端赤白肉际凹陷中。","steps":"1. 仰卧位。\n2. 找第1跖趾关节近端：沿第1跖骨内侧缘由上向下（拇趾方向）推至顶手处即是。\n3. 在第1跖趾关节近端赤白肉际凹陷处取穴。","op":"直刺0.5～0.8寸。"},{"no":42,"name":"公孙","meridian":"足太阴脾经","code":"SP 4","special":"络穴，八脉交会穴（通于冲脉）","loc":"在跖区，第1跖骨底的前下缘赤白肉际处。","steps":"1. 仰卧位。\n2. 找第1跖骨底：沿第1跖骨内侧缘，由下向上推至凸起处即是第1跖骨基底部。\n3. 在第1跖骨基底部前下方赤白肉际凹陷处取穴。","op":"直刺0.6～1.2寸。"},{"no":43,"name":"三阴交","meridian":"足太阴脾经","code":"SP 6","special":"","loc":"在小腿内侧，内踝尖上3寸，胫骨内侧缘后际。","steps":"1. 仰卧位伸足。\n2. 在内踝尖上3寸（一夫法）（参照病人手指），胫骨内侧缘后际处取穴。","op":"直刺1～1.5寸。孕妇禁针。"},{"no":44,"name":"地机","meridian":"足太阴脾经","code":"SP 8","special":"郄穴","loc":"在小腿内侧，阴陵泉下3寸，胫骨内侧缘后际。","steps":"1. 正坐位屈膝或仰卧位。\n2. 先找阴陵泉：胫骨内侧髁下缘与胫骨内侧缘之间的凹陷中。\n3. 在阴陵泉下3寸（一夫法）（参照病人手指），胫骨内侧缘后际处。","op":"直刺1～1.5寸。"},{"no":45,"name":"阴陵泉","meridian":"足太阴脾经","code":"SP 9","special":"合穴","loc":"在小腿内侧，胫骨内侧髁下缘与胫骨内侧缘之间的凹陷中。","steps":"1. 正坐位屈膝或仰卧位。\n2. 找胫骨内侧髁下缘：沿胫骨内侧后缘由下向上推至顶手处即是胫骨内侧髁下缘。\n3. 在胫骨内侧髁下缘与胫骨内侧后缘之间凹陷中取穴。","op":"直刺1～2寸。治疗膝痛可向阳陵泉或委中方向透刺。"},{"no":46,"name":"血海","meridian":"足太阴脾经","code":"SP 10","special":"","loc":"在股前区，髌底内侧端上2寸，股内侧肌隆起处。","steps":"1. 正坐位屈膝或仰卧位屈膝。\n2. 找髌骨底至髌骨尖取2寸。\n3. 在髌骨底内上缘上2寸，伸腿用力时，股内侧肌隆起处取穴。","op":"直刺1～1.5寸。"},{"no":47,"name":"大横","meridian":"足太阴脾经","code":"SP 15","special":"","loc":"在腹部，脐中旁开4寸。","steps":"1. 仰卧位。\n2. 脐中旁开4寸处取穴。（两乳头之间为8寸，折半即为4寸。）","op":"直刺1～2寸。"},{"no":48,"name":"大包","meridian":"足太阴脾经","code":"SP 21","special":"脾之大络","loc":"在胸外侧区，第6肋间隙，在腋中线上。","steps":"1. 侧卧位，举臂。\n2. 先找第6肋：男性乳头平第4肋间隙，往下找第6肋间隙。\n3. 第6肋间隙往后伸延，在腋中线（即腋窝正中垂直线）上取穴。","op":"斜刺或向后平刺0.5～0.8寸。"},{"no":49,"name":"极泉","meridian":"手少阴心经","code":"HT 1","special":"","loc":"在腋区，腋窝中央，腋动脉搏动处。","steps":"1. 侧卧位，举臂。\n2. 在腋窝正中，腋动脉跳动处。","op":"避开腋动脉，直刺或斜刺0.3～0.5寸。"},{"no":50,"name":"少海","meridian":"手少阴心经","code":"HT 3","special":"合穴","loc":"在肘前区，横平肘横纹，肱骨内上髁前缘。","steps":"1. 正坐位或仰卧位。\n2. 向上屈肘，横平肘横纹，当肱骨内上髁前缘凹陷处取穴。","op":"直刺0.5～1寸。"},{"no":51,"name":"通里","meridian":"手少阴心经","code":"HT 5","special":"络穴","loc":"在前臂前区，腕掌侧远端横纹上1寸，尺侧腕屈肌腱的桡侧缘。","steps":"1. 正坐位或仰卧位，仰掌。\n2. 握拳屈腕，显露尺侧屈腕肌腱。\n3. 在尺侧腕屈肌腱的桡侧缘，腕远端横纹上1寸（患者拇指同身寸）处取穴。","op":"直刺0.3～0.5寸。不宜深刺，以免伤及血管和神经。"},{"no":52,"name":"阴郄","meridian":"手少阴心经","code":"HT 6","special":"郄穴","loc":"在前臂前区，腕掌侧远端横纹上0.5寸，尺侧腕屈肌腱的桡侧缘。","steps":"1. 正坐位或仰卧位，仰掌。\n2. 握拳屈腕，显露尺侧屈腕肌腱。\n3. 在尺侧腕屈肌腱的桡侧缘，腕掌侧远端横纹上0.5寸（患者拇指同身寸）处取穴。","op":"直刺0.3～0.5寸。不宜深刺，以免伤及血管和神经。"},{"no":53,"name":"神门","meridian":"手少阴心经","code":"HT 7","special":"输穴，心之原穴","loc":"在腕前区，腕掌侧远端横纹尺侧端，尺侧腕屈肌腱的桡侧缘。","steps":"1. 正坐位或仰卧位，仰掌。\n2. 握拳屈腕，显露尺侧腕屈肌肌腱。\n3. 在尺侧腕屈肌肌腱桡侧沟中，腕掌侧远端横纹处取穴。","op":"直刺0.3～0.5寸。"},{"no":54,"name":"少府","meridian":"手少阴心经","code":"HT 8","special":"荥穴","loc":"在手掌，横平第5掌指关节近端，第4、5掌骨之间。","steps":"1. 正坐位或仰卧位，仰掌。\n2. 横平第5掌指关节近端（近心端），第4、5掌骨之间。","op":"直刺0.3～0.5寸。"},{"no":55,"name":"少冲","meridian":"手少阴心经","code":"HT 9","special":"井穴","loc":"在手指，小指末节桡侧，指甲根角侧上方0.1寸（指寸）。","steps":"1. 正坐位或仰卧位，俯掌。\n2. 在小指桡侧指甲根角侧上方0.1寸处取穴。（见取穴原则说明第25点）","op":"浅刺0.1寸，或点刺出血。"},{"no":56,"name":"少泽","meridian":"手太阳小肠经","code":"SI 1","special":"井穴","loc":"在手指，小指末节尺侧，指甲根角侧上方0.1寸（指寸）。","steps":"1. 正坐位或仰卧位，俯掌。\n2. 在小指尺侧指甲根角侧上方0.1寸处取穴。（见取穴原则说明第25点）","op":"浅刺0.1寸或点刺出血。孕妇慎用。"},{"no":57,"name":"后溪","meridian":"手太阳小肠经","code":"SI 3","special":"输穴，八脉交会穴（通于督脉）","loc":"在手内侧，第5掌指关节尺侧近端赤白肉际凹陷中。","steps":"1. 俯掌微握拳。\n2. 找第5掌指关节近端：沿第5掌骨内侧向下推至顶手处即是。\n3. 在第5掌指关节近端赤白肉际凹陷中取穴。","op":"直刺0.5～l寸。治手指挛痛可透刺合谷穴。"},{"no":58,"name":"腕骨","meridian":"手太阳小肠经","code":"SI 4","special":"小肠之原穴","loc":"在腕区，第5掌骨底与三角骨之间的赤白肉际凹陷中。","steps":"1. 仰掌或俯掌。\n2. 沿第5掌骨尺侧由下向着肘部方向推，第一个顶手的骨是第5掌骨基底部远心端，继续上推，过基底部后有一个凹陷，凹陷前顶手的骨即是三角骨。\n3. 在三角骨与第5掌骨基底部近心端之间凹陷处取穴。","op":"直刺0.3～0.5寸。"},{"no":59,"name":"养老","meridian":"手太阳小肠经","code":"SI 6","special":"郄穴","loc":"在前臂后区，腕背横纹上1寸，尺骨头桡侧凹陷中。","steps":"1. 仰卧位，俯掌。\n2. 腕背横纹上1寸（患者拇指同身寸），尺骨头桡侧凹陷中。（屈肘掌心向胸，掌心向内反转，则尺骨茎突旁桡侧裂开1孔，穴在尺骨茎突的桡侧骨缝中。）","op":"直刺或斜刺0.5～0.8寸。强身保健可用温和灸。"},{"no":60,"name":"支正","meridian":"手太阳小肠经","code":"SI 7","special":"络穴","loc":"在前臂后区，腕背侧远端横纹上5寸，尺骨尺侧与尺侧腕屈肌之间。","steps":"1. 仰卧位，手掌向肩部屈肘。\n2. 腕背横纹上5寸：肘横纹至腕远端横纹作12寸，折半为6寸，再折半为3寸，3寸与6寸间分3等分找5寸。\n3. 腕背侧远端横纹上5寸，当尺骨尺侧与尺侧腕屈肌之间取穴。","op":"直刺或斜刺0.5～0.8寸。"},{"no":61,"name":"小海","meridian":"手太阳小肠经","code":"SI 8","special":"合穴","loc":"在肘后区，尺骨鹰嘴与肱骨内上髁之间凹陷中。","steps":"1. 仰卧位，屈手向头。\n2. 当尺骨鹰嘴与内上髁之间凹陷中取穴。","op":"直刺0.3～0.5寸。"},{"no":62,"name":"肩贞","meridian":"手太阳小肠经","code":"SI 9","special":"","loc":"在肩胛区，肩关节后下方，腋后纹头直上1寸。","steps":"1. 正坐位，上臂内收。\n2. 在腋后纹头直上1寸（患者拇指同身寸）处取穴。","op":"直刺1～1.5寸。不宜向胸侧深刺。"},{"no":63,"name":"天宗","meridian":"手太阳小肠经","code":"SI 11","special":"","loc":"在肩胛区，肩胛冈中点与肩胛骨下角连线上1∕3与下2∕3交点凹陷中。","steps":"1.   正坐或俯卧位。\n2.   触摸寻找肩胛冈内侧端与外侧端（肩峰转角处）。\n3.   寻找肩胛骨冈中点及肩胛骨下角。\n4.   将肩胛冈中点与下角连线，3等分，在上1/3与下2/3交点处取穴。","op":"直刺或斜刺0.5～1寸。遇到阻力不可强行进针。肩胛骨冈下窝"},{"no":64,"name":"颧髎","meridian":"手太阳小肠经","code":"SI 18","special":"","loc":"在面部，颧骨下缘，目外眦直下凹陷中。","steps":"1. 正坐仰靠或仰卧位。\n2. 目外眦直下，颧骨下缘凹陷处取穴。","op":"直刺0.3～0.5寸，斜刺或平刺0.5～1寸。"},{"no":65,"name":"听宫","meridian":"手太阳小肠经","code":"SI 19","special":"","loc":"在面部，耳屏正中与下颌骨髁突之间的凹陷中。","steps":"1.正坐位或仰（侧）卧位。\n2.微张口，触摸耳屏前与下颌骨髁突之间的凹陷。\n3.在耳屏正中与下颌骨髁突之间张口凹陷处取穴。\n备注：张口时下颌骨髁状突向前移动，后缘与耳屏间出现凹陷，闭口时下颌骨髁突恢复原位，凹陷消失。故需张口取穴与针刺。","op":"张口，直刺1～1.5寸。留针时要保持一定的张口姿势。"},{"no":66,"name":"睛明","meridian":"足太阳膀胱经","code":"BL 1","special":"","loc":"在面部，目内眦内上方眶内侧壁凹陷中。","steps":"1. 仰卧位，闭目。\n2. 手指触摸目内眦上，眼眶内侧壁骨边与眼球之间的凹陷。\n3. 在目内眦内上方，眼眶内侧壁与眼球之间的凹陷处取穴。13.5&14.5：嘱患者闭目，医者押手轻推眼球向外侧固定，刺手缓慢进针，紧靠眶缘直刺0.5～1寸。遇到阻力时，不","op":"宜强行进针，应改变进针方向或退针。不捻转，不提插（或只轻微地捻转和提插）。出针后按压针孔片刻，以防出血。针具宜细，消毒宜严。禁直接灸（12.5：禁灸）。"},{"no":67,"name":"攒竹","meridian":"足太阳膀胱经","code":"BL 2","special":"","loc":"在面部，眉头凹陷中，额切迹处。","steps":"1. 正坐位或仰卧位。\n2. 在眉毛内侧端凹陷处，约在目内眦直上，额切迹处（有一小凹陷）取穴。","op":"13.5&14.5：可向眉中或向眼眶内缘平刺或斜刺0.3～0.5寸（12.5：0.5～0.8寸），或直刺0.2～0.3寸。禁直接灸（12.5：禁灸）。"},{"no":68,"name":"天柱","meridian":"足太阳膀胱经","code":"BL 10","special":"","loc":"在颈后区，横平第2颈椎棘突上际，斜方肌外缘凹陷中。","steps":"1. 俯坐位或俯卧位。\n2. 由枕骨粗隆向下触摸，第1个挡手的骨即为第2颈椎棘突。\n3. 寻找斜方肌外缘。\n4. 在横平第2颈椎棘突上际，斜方肌外缘凹陷处取穴。","op":"直刺或斜刺0.5～0.8寸，不可向内上方深刺，以免伤及延髓。"},{"no":69,"name":"大杼","meridian":"足太阳膀胱经","code":"BL 11","special":"八会穴之骨会","loc":"在脊柱区，第1胸椎棘突下，后正中线旁开1.5寸。","steps":"1. 俯坐位。\n2. 先找第7颈椎棘突下（大椎），往下找第1胸椎棘突下（陶道）。\n3. 第1胸椎棘突下，后正中线旁开1.5寸处取穴。（肩胛骨内侧端至后正中线为3寸，折半即为1.5寸）","op":"斜刺0.5～0.8寸。本经背部诸穴，不宜深刺，以免伤及内部重要脏器。说明：不建议采用俯卧位，因为俯卧位不容易找大椎穴，或是第3胸椎。容易出错。建议凡是以大椎或第3胸椎定位，找其他穴位时，最好采用俯坐，不采用俯卧位，避免出错。如由第7胸椎往上找就可以采用俯卧位。"},{"no":70,"name":"风门","meridian":"足太阳膀胱经","code":"BL 12","special":"","loc":"在脊柱区，第2胸椎棘突下，后正中线旁开1.5寸。","steps":"1. 俯坐位。\n2. 先找第2胸椎棘突：直立，两手下垂时，两肩胛骨上角连线与后正中线的交点即为第2胸椎棘突。或由大椎穴往下找第2胸椎棘突。\n3. 在第2胸椎棘突下，后正中线（督脉）旁开1.5寸处取穴。（肩胛骨内侧端至后正中线为3寸， 折半即为1.5寸）","op":"斜刺0.5～0.8寸。热证宜点刺放血。"},{"no":71,"name":"肺俞","meridian":"足太阳膀胱经","code":"BL 13","special":"肺之背俞穴","loc":"在脊柱区，第3胸椎棘突下，后正中线旁开1.5寸。","steps":"1. 俯坐位。\n2. 找第3胸椎棘突：两肩胛冈内侧端连线平第3胸椎棘突。或由大椎穴往下找第3胸椎棘突。\n3. 第3胸椎棘突下（身柱），后正中线旁开1.5寸处取穴。（肩胛骨内侧端至后正中线为3寸， 折半即为1.5寸）","op":"斜刺0.5～0.8寸。热证宜点刺放血。"},{"no":72,"name":"心俞","meridian":"足太阳膀胱经","code":"BL 15","special":"心之背俞穴","loc":"在脊柱区，第5胸椎棘突下，后正中线旁开1.5寸。","steps":"1. 俯坐位或俯卧位。\n2. 先找第7胸椎棘突：两肩胛骨下角连线平第7胸椎棘突。\n3. 往上找第5胸椎棘突。\n4. 在第5胸椎棘突下（神道穴），后正中线旁开1.5寸处取穴。（肩胛骨内侧端至后正中线为3寸， 折半即为1.5寸）","op":"斜刺0.5～0.8寸。"},{"no":73,"name":"膈俞","meridian":"足太阳膀胱经","code":"BL 17","special":"八会穴之血会","loc":"在脊柱区，第7胸椎棘突下，后正中线旁开1.5寸。","steps":"1. 俯坐位或俯卧位。\n2. 第7胸椎棘突：两肩胛骨下角连线平第7胸椎棘突。\n3. 在第7胸椎棘突下（至阳），后正中线旁开1.5寸处取穴。（肩胛骨内侧端至后正中线为3寸， 折半即为1.5寸）","op":"斜刺0.5～0.8寸。"},{"no":74,"name":"肝俞","meridian":"足太阳膀胱经","code":"BL 18","special":"肝之背俞穴","loc":"在脊柱区，第9胸椎棘突下，后正中线旁开1.5寸。","steps":"1.   俯臥位或俯卧位。\n2.   先找第7胸椎棘突：两肩胛骨下角连线平第7胸椎棘突。\n3.   由第7胸椎棘突往下找第9胸椎棘突。\n4.   在第9胸椎棘突下（筋缩穴），后正中线旁开1.5寸处取穴。（肩胛骨内侧端至后正中线为3寸， 折半即为1.5寸）","op":"斜刺0.5～0.8寸。"},{"no":75,"name":"胆俞","meridian":"足太阳膀胱经","code":"BL 19","special":"胆之背俞穴","loc":"在脊柱区，第10胸椎棘突下，后正中线旁开1.5寸。","steps":"1.   俯卧位。\n2.   先找第7胸椎棘突：两肩胛骨下角连线平第7胸椎棘突。\n3.   由第7胸椎棘突往下找第10胸椎棘突。\n4.   第10胸椎棘突下（中枢穴），后正中线旁开1.5寸处取穴。（肩胛骨内侧端至后正中线为3寸， 折半即为1.5寸）","op":"斜刺0.5～0.8寸。"},{"no":76,"name":"脾俞","meridian":"足太阳膀胱经","code":"BL 20","special":"脾之背俞穴","loc":"在脊柱区，第11胸椎棘突下，后正中线旁开1.5寸。","steps":"1. 俯卧位。\n2. 先找第12胸椎棘突：两肩胛下角连线平第7胸椎棘突，两髂嵴高点连线平第4腰椎棘突，第7胸椎棘突与第4腰椎棘突连线的中点即为第12胸椎棘突。\n3. 往上找第11胸椎棘突。或由第7胸椎棘突往下找。\n4. 在第11胸椎棘突下（脊中穴），后正中线旁开1.5寸处取穴。（肩胛骨内侧端至后正中线为3寸， 折半即为1.5寸）","op":"斜刺0.5～0.8寸。"},{"no":77,"name":"胃俞","meridian":"足太阳膀胱经","code":"BL 21","special":"胃之背俞穴","loc":"在脊柱区，第12胸椎棘突下，后正中线旁开1.5寸。","steps":"1. 俯卧位。\n2. 先找第12胸椎棘突：两肩胛下角连线平第7胸椎棘突，两髂嵴高点连线平第4腰椎棘突，第 7胸椎棘突与第4腰椎棘突连线的中点即为第12胸椎棘突。\n3. 在第12胸椎棘突下，后正中线旁开1.5寸处取穴。（肩胛骨内侧端至后正中线为3寸， 折半即为1.5寸）","op":"斜刺0.5～0.8寸。"},{"no":78,"name":"三焦俞","meridian":"足太阳膀胱经","code":"BL 22","special":"三焦之背俞穴","loc":"在脊柱区，第1腰椎棘突下，后正中线旁开1.5寸。","steps":"1.   俯卧位。\n2.   先找第4腰椎棘突：两髂嵴高点连线平第4腰椎棘突。\n3.   由第4腰椎棘突往上找第1腰椎棘突。\n4.   在第1腰椎棘突下（悬枢穴），后正中线旁开1.5寸处取穴。（肩胛骨内侧端至后正中线为3寸， 折半即为1.5寸）","op":"12.5：直刺0.5～1.2寸。13.5&14.5：直刺0.5～1寸。"},{"no":79,"name":"肾俞","meridian":"足太阳膀胱经","code":"BL 23","special":"肾之背俞穴","loc":"在脊柱区，第2腰椎棘突下，后正中线旁开1.5寸。","steps":"1.   俯卧位。\n2.   先找第4腰椎棘突：两髂嵴高点连线平第4腰椎棘突。\n3.   由第4腰椎棘突往上找第2腰椎。\n4.   在第2腰椎棘突下（命门穴），后正中线旁开1.5寸处取穴。（肩胛骨内侧端至后正中线为3寸， 折半即为1.5寸）","op":"直刺0.5～1寸。"},{"no":80,"name":"大肠俞","meridian":"足太阳膀胱经","code":"BL 25","special":"大肠之背俞穴","loc":"在脊柱区，第4腰椎棘突下，后正中线旁开1.5寸。","steps":"1. 俯卧位。\n2. 先找第4腰椎棘突：两髂嵴高点连线平第4腰椎棘突。\n3. 在第4腰椎棘突下（腰阳关），后正中线旁开1.5寸处取穴。（肩胛骨内侧端至后正中线为3寸， 折半即为1.5寸）","op":"直刺0.8～1.2寸。"},{"no":81,"name":"小肠俞","meridian":"足太阳膀胱经","code":"BL 27","special":"小肠之背俞穴","loc":"在骶区，横平第1骶后孔，骶正中嵴旁开1.5寸。","steps":"1. 俯卧位。\n2. 找第1骶后孔：从髂嵴高点沿骨边向后触摸，当摸到最向后正中突出的骨即是髂后上棘，髂后上棘约平第1骶后孔。\n3. 横平第1骶后孔，骶正中嵴旁开1.5寸处取穴。（肩胛骨内侧端至后正中线为3寸， 折半即为1.5寸）","op":"直刺或斜刺0.8～1.2寸。"},{"no":82,"name":"膀胱俞","meridian":"足太阳膀胱经","code":"BL 28","special":"膀胱之背俞穴","loc":"在骶区，横平第2骶后孔，骶正中嵴旁开1.5寸。","steps":"1. 俯卧位。\n2. 找第2骶后孔：从髂嵴高点沿骨边向后触摸，当摸到最向后正中突出的骨即为髂后上棘，髂后上棘下缘，约平第2骶后孔。\n3. 横平第2骶后孔，骶正中嵴旁开1.5寸处取穴。（肩胛骨内侧端至后正中线为3寸， 折半即为1.5寸）","op":"直刺或斜刺0.8～1.2寸。"},{"no":83,"name":"次髎","meridian":"足太阳膀胱经","code":"BL 32","special":"","loc":"在骶区，正对第2骶后孔中。","steps":"1. 俯卧位。\n2. 找髂后上棘：从髂嵴高点沿骨边向后触摸，当摸到最突向后正中的骨即为髂后上棘。\n3. 髂后上棘下缘与骶正中嵴之间的凹陷为第2骶后孔。","op":"直刺1～1.5寸。"},{"no":84,"name":"承扶","meridian":"足太阳膀胱经","code":"BL 36","special":"","loc":"在股后区，臀沟的中点。","steps":"1. 俯卧位。\n2. 在臀横纹正中取穴。","op":"直刺1～2寸。"},{"no":85,"name":"委阳","meridian":"足太阳膀胱经","code":"BL 39","special":"三焦之下合穴","loc":"在膝部，腘横纹上，股二头肌腱的内侧缘。","steps":"1.   俯卧位。\n2.   微屈膝显露腘横纹及肌腱。\n3.   腘横纹外侧端粗大明显的肌腱即是股二头肌腱。\n4.   在腘横纹上，股二头肌腱内侧缘取穴。","op":"直刺1～1.5寸。"},{"no":86,"name":"委中","meridian":"足太阳膀胱经","code":"BL 40","special":"合穴，膀胱之下合穴","loc":"在膝后区，腘横纹中点。","steps":"1. 俯卧位，微屈膝。\n2. 在腘窝横纹中点凹陷处取穴。","op":"直刺1～1.5寸，或用三棱针点刺腘静脉出血。针刺不宜过快、过强、过深，以免伤及血管和神经。"},{"no":87,"name":"膏肓","meridian":"足太阳膀胱经","code":"BL 43","special":"","loc":"在脊柱区，第4胸椎棘突下，后正中线旁开3寸。","steps":"1. 俯坐位。\n2. 两手抱肘，先找第3胸椎棘突：两肩胛骨内侧端连线平第3胸椎棘突。\n3. 往下找第4胸椎棘突。或由第7胸椎棘突往上找。\n4. 在第4胸椎棘突下，后正中线旁开3寸处取穴。（肩胛骨内侧端至后正中线即为3寸）","op":"斜刺0.5～0.8寸。此穴多用灸法，每次7～15壮，或温灸15～30分钟。"},{"no":88,"name":"志室","meridian":"足太阳膀胱经","code":"BL 52","special":"","loc":"在腰区，第2腰椎棘突下，后正中线旁开3寸。","steps":"1. 俯卧位。\n2. 先找第4腰椎棘突：两髂嵴高点连线平第4腰椎棘突。\n3. 由第4腰椎棘突往上找第2腰椎棘突。\n4. 在第2腰椎棘突下（命门），后正中线旁开3寸处取穴。（肩胛骨内侧端至后正中线即为3寸）","op":"斜刺0.5～0.8寸。"},{"no":89,"name":"秩边","meridian":"足太阳膀胱经","code":"BL 54","special":"","loc":"在骶区，横平第4骶后孔，骶正中嵴旁开3寸。","steps":"1. 俯卧位。\n2. 找骶管裂孔：骶正中嵴下端与骶骨角之间形成的裂沟即为骶管裂孔。\n3. 找骶骨角：在骶管裂孔两侧（臀纹头上下）各有一个圆形小骨，即为骶骨角。\n4. 骶骨角外上方约平第4骶后孔。\n5. 横平第4骶后孔，骶正中嵴旁开3寸处取穴。（肩胛骨内侧缘与后正中线为3寸）。","op":"直刺1.5～2寸。"},{"no":90,"name":"承山","meridian":"足太阳膀胱经","code":"BL 57","special":"","loc":"在小腿后区，腓肠肌两肌腹与肌腱交角处。","steps":"1. 俯卧位。\n2. 伸小腿或足跟上提，腓肠肌收缩隆起时，肌腹下出现人字形交角，在交角下凹陷处取穴。","op":"直刺1～2寸。不宜做过强的刺激，以免引起腓肠肌痉挛。"},{"no":91,"name":"飞扬","meridian":"足太阳膀胱经","code":"BL 58","special":"络穴","loc":"在小腿后区，昆仑直上7寸，腓肠肌外下缘与跟腱移行处。","steps":"1. 俯卧位，伸腿。\n2. 昆仑穴上7寸：腘横纹至外踝尖为16寸，折半为8寸，减1寸（患者拇指同身寸）即为7寸。\n3. 昆仑直上7寸，腿背正中线旁开约1寸，腓肠肌外下缘与跟腱移行处取穴。","op":"直刺1～1.5寸。"},{"no":92,"name":"昆仑","meridian":"足太阳膀胱经","code":"BL 60","special":"经穴","loc":"在踝区，外踝尖与跟腱之间的凹陷中。","steps":"1. 仰卧屈膝或伸足。\n2. 在外踝尖与跟腱之间的凹陷处取穴。","op":"直刺0.5～0.8寸。孕妇禁用，经期慎用。"},{"no":93,"name":"申脉","meridian":"足太阳膀胱经","code":"BL 62","special":"八脉交会穴（通于阳跷脉）","loc":"在踝区，外踝尖直下，外踝下缘与跟骨之间凹陷中。","steps":"1. 仰卧位伸足。\n2. 在足外踝尖正下方，外踝下缘与跟骨之间凹陷处取穴。","op":"直刺0.3～0.5寸。"},{"no":94,"name":"束骨","meridian":"足太阳膀胱经","code":"BL 65","special":"输穴","loc":"在跖区，第5跖趾关节的近端，赤白肉际处。","steps":"1. 仰卧位。\n2. 找第5跖趾关节：沿足外侧第5跖骨由后向小趾方向推动，触及较粗大挡手的骨即是第5跖趾关节近端。\n3. 在第5跖趾关节近端，赤白肉际处取穴。","op":"直刺0.3～0.5寸。"},{"no":95,"name":"至阴","meridian":"足太阳膀胱经","code":"BL 67","special":"井穴","loc":"在足趾，足小趾末节外侧，趾甲根角侧后方0.1寸（指寸）。","steps":"1. 仰卧位。\n2. 在足小趾外侧，趾甲根角侧后方0.1寸处取穴。（见取穴原则说明第25点）","op":"浅刺0.1寸。胎位不正用灸法。"},{"no":96,"name":"涌泉","meridian":"足少阴肾经","code":"KI 1","special":"井穴","loc":"在足底，屈足卷趾时足心最凹陷中；约当足底第2、3趾蹼缘与足跟连线的前1/3与后2/3交点凹陷中。","steps":"1. 仰卧位。\n2. 找足心凹陷：足趾背伸或弯屈时显露足心凹陷。\n3. 足底第2、3趾蹼缘与足跟连线3等分，前1/3与后2/3交点凹陷处。（简便取穴与等分取穴参照应用。）","op":"直刺0.5～1寸，针刺时要防止刺伤足底动脉弓。临床常用灸法或药物贴敷。"},{"no":97,"name":"然谷","meridian":"足少阴肾经","code":"KI 2","special":"荥穴","loc":"在足内侧，足舟骨粗隆下方，赤白肉际处。","steps":"1. 仰卧位。\n2. 找足舟骨粗隆：足内踝前下方高大的骨即是。\n3. 在足舟骨粗隆最高点直下赤白肉际处取穴。","op":"直刺0.5～1寸。"},{"no":98,"name":"太溪","meridian":"足少阴肾经","code":"KI 3","special":"输穴，肾之原穴","loc":"在足踝区，内踝尖与跟腱之间凹陷中。","steps":"1. 仰卧位伸足。\n2. 平齐足内踝尖，当内踝尖与跟腱之间凹陷处取穴。","op":"直刺0.5～1寸。"},{"no":99,"name":"大钟","meridian":"足少阴肾经","code":"KI 4","special":"络穴","loc":"在跟区，内踝后下方，跟骨上缘，跟腱附着部前缘凹陷中。","steps":"1. 仰卧位。\n2. 先找太溪穴：内踝尖与跟腱之间的凹陷中。\n3. 在太溪穴下0.5寸左右（患者拇指同身寸），跟腱内侧缘取穴。","op":"直刺0.3～0.5寸。"},{"no":100,"name":"照海","meridian":"足少阴肾经","code":"KI 6","special":"八脉交会穴（通于阴跷脉）","loc":"在踝区，内踝尖下1寸，内踝下缘边际凹陷中。","steps":"1. 仰卧位伸足。\n2. 内踝尖下1寸（患者拇指同身寸），内踝尖正下缘凹陷处取穴。","op":"直刺0.5～0.8寸。"},{"no":101,"name":"复溜","meridian":"足少阴肾经","code":"KI 7","special":"经穴","loc":"在小腿内侧，内踝尖上2寸，跟腱的前缘。","steps":"1. 仰卧位伸足。\n2. 内踝尖上2寸（对照患者手指取1夫法3寸，分3等分取2寸）。\n3. 在跟腱内侧前缘凹陷处取穴。","op":"直刺0.5～1寸。"},{"no":102,"name":"阴谷","meridian":"足少阴肾经","code":"KI 10","special":"合穴","loc":"在膝后区，腘横纹上，半腱肌肌腱外侧缘。","steps":"1. 仰卧位或正坐位屈膝。\n2. 触摸腘横纹内侧两条肌腱（即内侧为半膜肌腱，外侧为半腱肌腱）。\n3. 在腘窝内侧平齐委中穴，半腱肌腱外侧缘取穴。","op":"直刺1～1.5寸。"},{"no":103,"name":"大赫","meridian":"足少阴肾经","code":"KI 12","special":"","loc":"在下腹部，脐中下4寸，前正中线旁开0.5寸。","steps":"1. 仰卧位。\n2. 先找脐中下4寸：脐中至耻骨联合上缘为5寸，折半为2.5寸，加0.5寸即为3寸（关元），3寸与耻骨联合上缘的中点即为4寸（中极）。\n3. 脐中下4寸，前正中线旁开0.5寸（患者拇指同身寸）处取穴。","op":"直刺1～1.5寸。"},{"no":104,"name":"肓俞","meridian":"足少阴肾经","code":"KI 16","special":"","loc":"在腹部，脐中旁开0.5寸。","steps":"1. 仰卧位。\n2. 与脐中平齐，旁开0.5寸（患者拇指同身寸）处取穴。","op":"直刺1～1.5寸。"},{"no":105,"name":"天池","meridian":"手厥阴心包经","code":"PC 1","special":"","loc":"在胸部，第4肋间隙，前正中线旁开5寸。","steps":"1. 正坐位或仰卧位。\n2. 正中线旁开5寸：乳头（乳头即前正中线旁开4寸）外侧1寸（患者拇指同身寸）。\n3. 当第4肋间隙（平齐乳头）中取穴。","op":"斜刺或平刺0.3～0.5寸，不可深刺，以免伤及心、肺。"},{"no":106,"name":"曲泽","meridian":"手厥阴心包经","code":"PC 3","special":"合穴","loc":"在肘前区，肘横纹上，肱二头肌腱的尺侧缘凹陷中。","steps":"1. 正坐位或仰卧位，仰掌。\n2. 微屈肘，在肘横纹上，肱二头肌腱的尺侧缘凹陷中取穴。","op":"直刺1～1.5寸；或点刺出血。"},{"no":107,"name":"郄门","meridian":"手厥阴心包经","code":"PC 4","special":"郄穴","loc":"在前臂前区，腕掌侧远端横纹上5寸，掌长肌腱与桡侧腕屈肌腱之间。","steps":"1. 正坐位或仰卧位，仰掌。\n2. 腕横纹上5寸：腕横纹至肘横纹为12寸，折半即为6寸，再折半为3寸，在6寸与3寸间分3等分找5寸。\n3. 腕掌侧远端横纹上5寸，掌长肌腱与桡侧腕屈肌腱之间取穴。（握拳时，两筋之间的凹陷非常明显，以此凹陷向上延伸，则易取穴）。","op":"直刺0.5～1寸。"},{"no":108,"name":"间使","meridian":"手厥阴心包经","code":"PC 5","special":"经穴","loc":"在前臂前区，腕掌侧远端横纹上3寸，掌长肌腱与桡侧腕屈肌腱之间。","steps":"1. 正坐位或仰卧位，仰掌。\n2. 腕横纹上3寸：腕横纹至肘横纹为12寸，折半即为6寸，再折半即为3寸。\n3. 腕掌侧远端横纹上3寸，掌长肌腱与桡侧腕屈肌腱之间取穴。（握拳时，两筋之间的凹陷非常明显，以此凹陷向上延伸，则易取穴）。","op":"直刺0.5～1寸。"},{"no":109,"name":"内关","meridian":"手厥阴心包经","code":"PC 6","special":"络穴，八脉交会穴（通于阴维脉）","loc":"在前臂前区，腕掌侧远端横纹上2寸，掌长肌腱与桡侧腕屈肌腱之间。","steps":"1. 正坐位或仰卧位，仰掌。\n2. 腕掌侧远端横纹上2寸：腕横纹至肘横纹为12寸，折半即为6寸，再折半即为3寸（间使）， 3寸与腕掌侧远端横纹之间分3等分找2寸。\n3. 腕掌侧远端横纹上2寸，掌长肌腱与桡侧腕屈肌 腱之间取穴。（握拳时，两筋之间的凹陷非常明显，以此凹陷向上延伸，则易取穴）。","op":"直刺0.5～1寸。"},{"no":110,"name":"大陵","meridian":"手厥阴心包经","code":"PC 7","special":"输穴，心包之原穴","loc":"在腕前区，腕掌侧远端横纹中，掌长肌腱与桡侧腕屈肌腱之间。","steps":"1. 正坐位或仰卧位，仰掌。\n2. 腕掌侧远端横纹正中，当掌长肌腱与桡侧腕屈肌腱之间取穴。（握拳时，两筋之间的凹 陷非常明显）","op":"直刺0.3～0.5寸。"},{"no":111,"name":"劳宫","meridian":"手厥阴心包经","code":"PC 8","special":"荥穴","loc":"在掌区，横平第3掌指关节近端，第2、3掌骨之间偏于第3掌骨。","steps":"1. 仰掌微握拳。\n2. 中指指尖下即第2、3掌骨间。\n3. 在第2、3掌骨之间，偏于第3掌骨侧取穴。","op":"直刺0.3～0.5寸。"},{"no":112,"name":"中冲","meridian":"手厥阴心包经","code":"PC 9","special":"井穴","loc":"在手指，中指末端最高点。","steps":"1. 正坐位或仰卧位，仰掌微握拳。\n2. 中指尖端的中央是穴。","op":"浅刺0.1寸；或点刺出血。"},{"no":113,"name":"关冲","meridian":"手少阳三焦经","code":"TE 1","special":"井穴","loc":"在手指，第4指末节尺侧，指甲根角侧上方0.1寸（指寸）。","steps":"1. 正坐位或仰卧位，俯掌。\n2. 在无名指尺侧指甲根角侧上方0.1寸处取穴。（见取穴原则说明第25点）","op":"浅刺0.1寸；或点刺出血。"},{"no":114,"name":"中渚","meridian":"手少阳三焦经","code":"TE 3","special":"输穴","loc":"在手背，第4、5掌骨间，第4掌指关节近端凹陷中。","steps":"1. 正坐位或仰卧位，握拳。\n2. 在掌指关节近端（近心端），第4、5掌骨之间凹陷中取穴。","op":"直刺0.3～0.5寸。"},{"no":115,"name":"阳池","meridian":"手少阳三焦经","code":"TE 4","special":"三焦之原穴","loc":"在腕后区，腕背侧远端横纹上，指伸肌腱的尺侧缘凹陷中。","steps":"1. 正坐位或仰卧位，俯掌，手腕背屈。\n2. 暴露腕背侧远端横纹及指伸肌腱与小指伸肌腱。\n3. 在两筋之间，腕背侧远端横纹上取穴。","op":"直刺0.3～0.5寸。"},{"no":116,"name":"外关","meridian":"手少阳三焦经","code":"TE 5","special":"络穴，八脉交会穴（通于阳维脉）","loc":"在前臂后区，腕背侧远端横纹上2寸，尺骨与桡骨间隙中点。","steps":"1. 正坐位或仰卧位，俯掌。\n2. 腕背侧远端横纹上2寸：先找腕背横纹上3寸，腕横纹至肘横纹为12寸，折半为6寸，6寸再折半即为3寸（支沟）。在3寸与腕背远端横纹之间分3等分取2寸。\n3. 腕背侧远端横纹上2寸，尺骨与桡骨之间隙中点取穴。","op":"直刺0.5～1寸。"},{"no":117,"name":"支沟","meridian":"手少阳三焦经","code":"TE 6","special":"经穴","loc":"在前臂后区，腕背侧远端横纹上3寸，尺骨与桡骨间隙中点。","steps":"1. 正坐位或仰卧位，俯掌。\n2. 腕背远端横纹上3寸：腕横纹至肘横纹为12寸，折半为6寸，6寸再折半即为3寸。\n3. 腕背侧远端横纹上3寸，尺骨与桡骨之间隙中点取穴。","op":"直刺0.5～1寸。"},{"no":118,"name":"肩髎","meridian":"手少阳三焦经","code":"TE 14","special":"","loc":"在三角肌区，肩峰角与肱骨大结节两骨间凹陷中。","steps":"1. 正坐手臂下垂。\n2. 找肩峰角：沿肩胛冈向外触摸到肩部转角处即是肩峰角。\n3. 手臂平举肩上出现两个凹陷，后面的凹陷即是肩峰角与肱骨大结节两骨间之凹陷。\n4. 在肩部后面凹陷取穴。","op":"向肩关节直刺1～1.5寸。"},{"no":119,"name":"翳风","meridian":"手少阳三焦经","code":"TE 17","special":"","loc":"在颈部，耳垂后方，乳突下端前方凹陷中。","steps":"1.   正坐位或侧卧位。\n2.   寻找耳后乳突下端前方凹陷。\n3.   找下颌角。\n4.   在乳突下端前方与下颌角之间的凹陷处取穴。\n5.   约在耳垂后下方。","op":"直刺0.5～1寸。"},{"no":120,"name":"角孙","meridian":"手少阳三焦经","code":"TE 20","special":"","loc":"在头部，耳尖正对发际处。","steps":"1. 正坐位或侧卧位。\n2. 将耳廓向耳屏对折暴露耳尖。（在耳尖作记号后还原耳廓）\n3. 在耳尖正对头部发际处取穴。","op":"12.5：平刺0.3～0.5寸；小儿痄腮用灯火灸。13.5&14.5：平刺0.3～0.5寸。"},{"no":121,"name":"耳门","meridian":"手少阳三焦经","code":"TE 21","special":"","loc":"在耳区，耳屏上切迹与下颌骨髁突之间的凹陷中。","steps":"1. 正坐位或侧卧位。\n2. 耳屏上切迹前方与下颌骨髁状突之间凹陷中，张口取穴。","op":"微张口，直刺0.5～1寸。"},{"no":122,"name":"丝竹空","meridian":"手少阳三焦经","code":"TE 23","special":"","loc":"12.5：在面部，眉梢凹陷中。13.5&14.5：在面部，眉梢凹陷中。注：瞳子髎直上。","steps":"1. 正坐位或仰卧位。\n2. 眉毛外端凹陷中取穴。","op":"平刺0.3～0.5寸。"},{"no":123,"name":"瞳子髎","meridian":"足少阳胆经","code":"GB 1","special":"","loc":"在面部，目外眦外侧0.5寸凹陷中。","steps":"1. 正坐位或仰卧位。\n2. 在目外眦外侧约0.5寸（患者拇指同身寸），当眶骨外缘凹陷中取穴。","op":"平刺0.3～0.5寸；或用三棱针点刺出血。"},{"no":124,"name":"听会","meridian":"足少阳胆经","code":"GB 2","special":"","loc":"在面部，耳屏间切迹与下颌骨髁突之间的凹陷中。","steps":"1. 正坐位或仰卧位。\n2. 找耳屏与对耳屏之间的切迹。\n3. 手指触摸屏间切迹前与下颌骨髁状突后缘之间，张口有凹陷。\n4. 在屏间切迹与下颌骨之间的凹陷处，张口取穴。","op":"微张口，直刺0.5～0.8寸。"},{"no":125,"name":"率谷","meridian":"足少阳胆经","code":"GB 8","special":"","loc":"在头部，耳尖直上入发际1.5寸。","steps":"1. 正坐位或仰（侧）卧位。\n2. 当耳尖直上（耳向前折时耳的最高点为耳尖），入发际1.5寸（眉间至前发际正中为3寸，折半即为1.5寸）。\n3. 咀嚼时，以手按之有肌肉鼓动。","op":"平刺0.5～0.8寸。"},{"no":126,"name":"完骨","meridian":"足少阳胆经","code":"GB 12","special":"","loc":"在头部，耳后乳突的后下方凹陷中。","steps":"1. 俯坐位或俯卧位。\n2. 在耳后乳突后下方凹陷处取穴。","op":"平刺0.5～0.8寸。"},{"no":127,"name":"阳白","meridian":"足少阳胆经","code":"GB 14","special":"","loc":"在头部，眉上1寸，瞳孔直上。","steps":"1. 仰卧位或正坐位。\n2. 眉间至前发际为3寸，3等分取一寸。（先在头面部分好3等分，再用量笔比对1寸）\n3. 目正视，瞳孔直上，眉上1寸处取穴。","op":"平刺0.5～0.8寸。"},{"no":128,"name":"头临泣","meridian":"足少阳胆经","code":"GB 15","special":"","loc":"在头部，前发际上0.5寸，瞳孔直上。","steps":"1. 仰卧或正坐位。\n2. 目正视，瞳孔直上。\n3. 入前发际0.5寸（患者拇指同身寸）处取穴。","op":"平刺0.5～0.8寸。"},{"no":129,"name":"风池","meridian":"足少阳胆经","code":"GB 20","special":"","loc":"在颈后区，枕骨之下，胸锁乳突肌上端与斜方肌上端之间的凹陷中。","steps":"1. 正坐位或俯卧位。\n2. 触摸寻找枕骨下缘、胸锁乳突肌与斜方肌上端之间的凹陷（向上、前、后推均有阻挡）。\n3. 在枕骨下，胸锁乳突肌与斜方肌上端之间的凹陷处取穴。","op":"针尖微下，向鼻尖斜刺0.8～1.2寸；或平刺透风府穴。深部中间为延髓，必须严格掌握针刺的角度与深度。"},{"no":130,"name":"肩井","meridian":"足少阳胆经","code":"GB 21","special":"","loc":"在肩胛区，第7颈椎棘突与肩峰最外侧点连线的中点。","steps":"1. 正坐位或俯卧位。\n2. 低头暴露第7颈椎（隆起最高并可随颈部转动而旋转）。\n3. 触摸肩胛冈外侧肩峰角找肩峰最外侧。\n4. 将量绳两端分别放在第7颈椎棘突与肩峰最外侧处折半。\n5. 在第7颈椎棘突与肩峰最外侧连线中点取穴。（用布带量了之后，折半，由颈椎棘突往外量）","op":"12.5：直刺0.5～0.8寸。内有肺尖，不可深刺；孕妇禁针。13.5&14.5：直刺0.3～0.5寸。内有肺尖，不可深刺；孕妇禁针。"},{"no":131,"name":"日月","meridian":"足少阳胆经","code":"GB 24","special":"胆之募穴","loc":"在胸部，第7肋间隙中，前正中线旁开4寸。","steps":"1. 仰卧位。\n2. 找第7肋间隙：男性乳头平第4肋间隙，往下找第7肋间隙。\n3. 前正中线旁开4寸：男性两乳头之间为8寸，折半为4寸，或男性乳头直下。\n4. 第7肋间隙中，前正中线旁开4寸取穴。","op":"斜刺或平刺0.5～0.8寸，不可深刺，以免伤及脏器。"},{"no":132,"name":"带脉","meridian":"足少阳胆经","code":"GB 26","special":"","loc":"在侧腹部，第11肋骨游离端垂线与脐水平线的交点上。","steps":"1. 仰卧位。\n2. 在第11肋骨游离端（章门）：沿着肋弓往外摸找第11肋骨游离端，约在腋前线。\n3. 第11肋骨游离端直下与脐相平处取穴。","op":"直刺1～1.5寸。"},{"no":133,"name":"环跳","meridian":"足少阳胆经","code":"GB 30","special":"","loc":"在臀部，股骨大转子最凸点与骶管裂孔连线的外1/3与内2/3交点处。","steps":"1. 侧卧屈股。\n2. 找股骨大转子高点：侧卧上腿尽量弯屈，下腿伸直，暴露股骨大转子，用手掌心或鱼际按压找到大转子高点并做好标记。\n3. 找骶骨裂孔：在骶正中嵴下端两侧，尾骨上方触摸到左右两个圆形的骨为骶骨角，骶正中嵴下端与骶骨角之间的裂沟即是骶管裂孔。\n4. 大转子高点与骶管裂孔连线3等分。\n5. 在大转子高点与骶管裂孔连线上的外1/3与内2/3的交点凹陷（按压）处取穴。","op":"直刺2～3寸。"},{"no":134,"name":"风市","meridian":"足少阳胆经","code":"GB 31","special":"","loc":"在股部，髌底上7寸：直立垂手，掌心贴于大腿时，中指尖所指凹陷中，髂胫束后缘。","steps":"1. 直立位。\n2. 简便取穴法，当直立垂手时，两手掌心贴于大腿外侧，当中指尖端处取穴。","op":"直刺1～1.5寸。说明：建议还是直立时找较准确。"},{"no":135,"name":"阳陵泉","meridian":"足少阳胆经","code":"GB 34","special":"合穴，胆之下合穴，八会穴之筋会","loc":"在小腿外侧，腓骨头前下方凹陷中。","steps":"1. 正坐垂足或仰卧位。\n2. 找腓骨小头：双脚并拢，从外踝尖沿腓骨向上滑动至膝关节外下方，可触及圆形小骨，即为腓骨小头。\n3. 在腓骨小头前下缘凹陷中取穴。","op":"直刺1～1.5寸。"},{"no":136,"name":"光明","meridian":"足少阳胆经","code":"GB 37","special":"络穴","loc":"在小腿外侧，外踝尖上5寸，腓骨前缘。","steps":"1. 仰卧伸足。\n2. 外踝高点上5寸：腘横纹至外踝尖为16寸，折半为8寸，再折半为4寸，4寸折半为2寸，找6寸处，4寸与6寸中点即为5寸。\n3. 外踝高点上5寸，腓骨前缘处取穴。","op":"12.5：直刺0.5～0.8寸。13.5&14.5：直刺1～1.5寸。"},{"no":137,"name":"悬钟","meridian":"足少阳胆经","code":"GB 39","special":"八会穴之髓会","loc":"在小腿外侧，外踝尖上3寸，腓骨前缘。","steps":"1. 仰卧伸足。\n2. 外踝高点上3寸：对照患者手指取一夫法。\n3. 外踝高点上3寸，腓骨前缘处取穴。","op":"直刺0.5～0.8寸。"},{"no":138,"name":"丘墟","meridian":"足少阳胆经","code":"GB 40","special":"胆之原穴","loc":"在踝区，外踝的前下方，趾长伸肌腱的外侧凹陷中。","steps":"1. 仰卧伸足。\n2. 足趾背屈暴露趾长伸肌腱（足外侧靠近外踝的肌腱）。\n3. 在趾长伸肌腱外侧，外踝骨前缘与下缘交点凹陷中取穴。","op":"直刺0.5～0.8寸。"},{"no":139,"name":"足临泣","meridian":"足少阳胆经","code":"GB 41","special":"输穴，八脉交会穴（通于带脉）","loc":"在足背，第4、5跖骨底结合部的前方，第5趾长伸肌腱外侧凹陷中。","steps":"1. 仰卧伸足。\n2. 找第5趾长伸肌腱：足趾背屈暴露肌腱，足外侧与小趾相连的肌腱即是。\n3. 触摸4、5跖骨结合部。\n4. 在结合部前方，小趾伸肌腱外侧凹陷处取穴。","op":"12.5：直刺0.5～0.8寸。13.5&14.5：直刺0.3～0.5寸。"},{"no":140,"name":"侠溪","meridian":"足少阳胆经","code":"GB 43","special":"荥穴","loc":"在足背，第4、5趾间，趾蹼缘后方赤白肉际处。","steps":"1.   仰卧伸足。\n2.   寻找第4、5跖趾关节前方。\n3.   足趾并拢显露趾缝纹端，张开时显露赤白肉际。\n4.   在纹头、赤白肉际处取穴。","op":"直刺0.3～0.5寸。"},{"no":141,"name":"足窍阴","meridian":"足少阳胆经","code":"GB 44","special":"井穴","loc":"在足趾，第4趾末节外侧，趾甲根角侧后方0.1寸（指寸）。","steps":"1. 仰卧伸足。\n2. 在第4趾外侧，距趾甲根角侧后方0.1寸处取穴。（见取穴原则说明第25点）","op":"浅刺0.1～0.2寸；或点刺出血。"},{"no":142,"name":"大敦","meridian":"足厥阴肝经","code":"LR 1","special":"井穴","loc":"在足趾，大趾末节外侧，趾甲根角侧后方0.1寸（指寸）。","steps":"1. 仰卧伸足。\n2. 在足大趾外侧，距趾甲根角侧后方0.1寸处取穴。（见取穴原则说明第25点）","op":"浅刺0.1～0.2寸；或点刺出血。"},{"no":143,"name":"行间","meridian":"足厥阴肝经","code":"LR 2","special":"荥穴","loc":"在足背，第1、2趾间，趾蹼缘后方赤白肉际处。","steps":"1. 仰卧伸足。\n2. 找第1、2跖趾关节前与第1、2趾间赤白肉际。\n3. 在第1、2跖趾关节前，趾蹼缘后方赤白肉际处取穴。","op":"直刺0.5～0.8寸。"},{"no":144,"name":"太冲","meridian":"足厥阴肝经","code":"LR 3","special":"输穴，肝之原穴","loc":"在足背，第1、2跖骨间，跖骨底结合部前方凹陷中，或触及动脉搏动。","steps":"1. 仰卧伸足。\n2. 触摸找第1、2跖骨结合部。\n3. 在第1、2跖骨结合部前方，第1、2跖骨间凹陷中取穴。","op":"12.5：直刺0.5～0.8寸。13.5&14.5：直刺0.5～1寸。"},{"no":145,"name":"蠡沟","meridian":"足厥阴肝经","code":"LR 5","special":"络穴","loc":"在小腿内侧，内踝尖上5寸，胫骨内侧面的中央。","steps":"1. 仰卧伸足。\n2. 内踝尖上5寸：内踝尖至胫骨内侧髁下方为13寸，先减3寸（1夫法）（患者手指）余为 10寸，10寸折半即为5寸。\n3. 内踝尖上5寸，胫骨内侧面的中央。","op":"平刺0.5～0.8寸。"},{"no":146,"name":"曲泉","meridian":"足厥阴肝经","code":"LR 8","special":"合穴","loc":"在膝部，腘横纹内侧端，半腱肌肌腱内缘凹陷中。","steps":"1.   正坐屈膝或仰卧屈膝。\n2.   暴露腘横纹内侧端。\n3.   在腘横纹内侧端处可触摸到半腱肌、半膜肌肌腱止端，\n4.   在两肌腱止端上方（即纹头上方），胫骨内侧髁后缘凹陷处取穴。","op":"直刺1～1.5寸。"},{"no":147,"name":"章门","meridian":"足厥阴肝经","code":"LR 13","special":"脾之募穴，八会穴之脏会","loc":"在侧腹部，在第11肋游离端的下际。","steps":"1. 侧卧位或仰卧位，手臂上举收腹。\n2. 沿着肋弓缓慢向下向后触摸，寻找第11肋游离端。","op":"直刺0.8～1寸。"},{"no":148,"name":"期门","meridian":"足厥阴肝经","code":"LR 14","special":"肝之募穴","loc":"在胸部，第6肋间隙，前正中线旁开4寸。","steps":"1. 仰卧位。\n2. 找第6肋间隙：男性乳头平第4肋间隙，往下找第6肋间隙。\n3. 前正中线旁开4寸：男性两乳头之间为8寸，折半为4寸，或男性乳头直下。\n4. 第6肋间隙，前正中线旁开4寸取穴。","op":"斜刺或平刺0.5～0.8寸，不可深刺，以免伤及内脏。"},{"no":149,"name":"长强","meridian":"督脉","code":"GV 1","special":"络穴","loc":"在会阴区，尾骨下方，尾骨端与肛门连线的中点处。","steps":"1. 俯卧位。\n2. 尾骨下方，尾骨端与肛门连线的中点处。","op":"紧靠尾骨前面斜刺0.8～1寸。不宜直刺，以免伤及直肠。"},{"no":150,"name":"腰阳关","meridian":"督脉","code":"GV 3","special":"","loc":"在脊柱区，第4腰椎棘突下凹陷中，后正中线上。","steps":"1. 俯卧位。\n2. 找第4腰椎棘突：两髂嵴高点连线平第4腰椎棘突。\n3. 后正中线上，第4腰椎棘突下凹陷中是穴。","op":"12.5：向上斜刺0.5～1寸。多用灸法。13.5&14.5：直刺或向上斜刺0.5～1寸。多用灸法。"},{"no":151,"name":"命门","meridian":"督脉","code":"GV 4","special":"","loc":"在脊柱区，第2腰椎棘突下凹陷中，后正中线上。","steps":"1. 俯卧位。\n2. 找第2腰椎棘突：两髂嵴连线高点平第4腰椎棘突，往上找第2个棘突。\n3. 后正中线上，第2腰椎棘突下凹陷中取穴。","op":"12.5：向上斜刺0.5～1寸。多用灸法。13.5&14.5：直刺或向上斜刺0.5～1寸。多用灸法。"},{"no":152,"name":"至阳","meridian":"督脉","code":"GV 9","special":"","loc":"在脊柱区，第7胸椎棘突下凹陷中，后正中线上。","steps":"1. 俯坐位或俯卧位。\n2. 找第7胸椎棘突：两肩胛骨下角连线平第7胸椎棘突。\n3. 后正中线上，第7胸椎棘突下凹陷中取穴。","op":"向上斜刺0.5～1寸。"},{"no":153,"name":"身柱","meridian":"督脉","code":"GV 12","special":"","loc":"在脊柱区，第3胸椎棘突下凹陷中，后正中线上。","steps":"1. 俯坐位。\n2. 找第3胸椎棘突：两肩胛冈内侧端连线与脊椎交点即为第3胸椎棘突。或由大椎往下找第3胸椎棘突。\n3. 后正中线上，第3胸椎棘突下凹陷中取穴。","op":"向上斜刺0.5～1寸。"},{"no":154,"name":"大椎","meridian":"督脉","code":"GV 14","special":"","loc":"在脊柱区，第7颈椎棘突下凹陷中，后正中线上。","steps":"1. 俯坐位。\n2. 找第7颈椎棘突：低头时颈下方隆起的棘突即是第7颈椎。\n3. 可将手指放在第7颈椎上，转头时锥体可随之转动。\n4. 后正中线上，第7颈椎棘突下凹陷中取穴。","op":"向上斜刺0.5～1寸。"},{"no":155,"name":"哑门","meridian":"督脉","code":"GV 15","special":"","loc":"在颈后区，第2颈椎棘突上际凹陷中，后正中线上。","steps":"1. 俯坐位或俯卧位。\n2. 从枕外隆凸沿后中线往下触摸，最先摸到的突起就是第2颈椎棘突。\n3. 后正中线上，第2颈椎棘突上凹陷处即为哑门穴。","op":"正坐位，头微前倾，项部放松，向下颌方向缓慢刺入0.5～1寸；不可向上深刺，以免刺入枕骨大孔，伤及延髓。"},{"no":156,"name":"风府","meridian":"督脉","code":"GV 16","special":"","loc":"在颈后区，枕外隆凸直下，两侧斜方肌之间凹陷中。","steps":"1. 俯坐位或俯卧位。\n2. 从枕外隆凸沿后中线往下触摸至枕骨下凹陷处取穴。","op":"正坐位，头微前倾，项部放松，向下颌方向缓慢刺入0.5～1寸；不可向上深刺，以免刺入枕骨大孔，伤及延髓。"},{"no":157,"name":"百会","meridian":"督脉","code":"GV 20","special":"","loc":"在头部，前发际正中直上5寸。","steps":"1. 正坐或俯卧位。\n2. 找前后发际：将头部前后头发向上推举，显露前后发际。\n3. 前发际正中直上5寸：前发际至后发际为12寸，折半为6寸，减1寸（患者拇指同身寸）即为5寸。\n4. 前发际正中直上5寸，头正中线上取穴。参考：当两耳尖直上，头正中线上取穴。","op":"平刺0.5～0.8寸；升阳举陷可用灸法。"},{"no":158,"name":"上星","meridian":"督脉","code":"GV 23","special":"","loc":"在头部，前发际正中直上1寸。","steps":"1. 正坐位或仰卧位。\n2. 找前发际：将头部前额头发推举，显露前发际。\n3. 在前发际正中直上1寸处（患者拇指同身寸）取穴。","op":"平刺0.5～0.8寸。"},{"no":159,"name":"神庭","meridian":"督脉","code":"GV 24","special":"","loc":"在头部，前发际正中直上0.5寸。","steps":"1. 正坐位或仰卧位。\n2. 找前发际：将头部前额头发推举，显露前发际。\n3. 在前发际正中直上0.5寸处（患者拇指同身寸）取穴。","op":"平刺0.5～0.8寸。"},{"no":160,"name":"素髎","meridian":"督脉","code":"GV 25","special":"","loc":"在面部，鼻尖的正中央。","steps":"1. 正坐位或仰卧位。\n2. 鼻尖的正中央。","op":"向上斜刺0.3～0.5寸；或点刺出血。"},{"no":161,"name":"水沟","meridian":"督脉","code":"GV 26","special":"","loc":"在面部，人中沟的上1/3与中1/3交点处。","steps":"1. 正坐位或仰卧位。\n2. 在人中沟的上1/3与下2/3交点处。","op":"向上斜刺0.3～0.5寸，强刺激，或指甲掐按。"},{"no":162,"name":"印堂","meridian":"督脉","code":"GV 29","special":"","loc":"在头部，两眉毛内侧端中间的凹陷中。","steps":"1. 正坐位或仰卧位。\n2. 在额部，当两眉头之间的中点凹陷处，对准鼻尖取穴。","op":"提捏局部皮肤，平刺0.3～0.5寸；或用三棱针点刺出血。"},{"no":163,"name":"中极","meridian":"任脉","code":"CV 3","special":"膀胱之募穴","loc":"在下腹部，脐中下4寸，前正中线上。","steps":"1. 仰卧位。\n2. 脐下4寸：先取关元穴，脐中至耻骨联合上缘为5寸，折半为2.5寸，加半寸（患者拇指同身寸）为3寸（关元），关元与耻骨联合上缘的中点即为4寸。\n3. 脐中下4寸，前正中线上取穴。","op":"12.5：直刺1～1.5寸；孕妇慎用。13.5&14.5：直刺1～1.5寸，需排尿后进行针刺；孕妇慎用。"},{"no":164,"name":"关元","meridian":"任脉","code":"CV 4","special":"小肠之募穴","loc":"在下腹部，脐中下3寸，前正中线上。","steps":"1. 仰卧位。\n2. 找脐中下3寸：脐中至耻骨联合上缘为5寸，折半为2.5寸，加0.5寸（患者拇指同身寸）即为3寸。\n3. 脐中下3寸，前正中线上取穴。","op":"12.5：直刺1～1.5寸；多用灸法。孕妇慎用。13.5&14.5：直刺1～1.5寸，需排尿后进行针刺；多用灸法。孕妇慎用。"},{"no":165,"name":"气海","meridian":"任脉","code":"CV 6","special":"","loc":"在下腹部，脐中下1.5寸，前正中线上。","steps":"1. 仰卧位。\n2. 找脐中下1.5寸：先找脐中下3寸，脐中至耻骨联合上缘为5寸，折半为2.5寸，加0.5寸（患者拇指同身寸）为3寸（关元），3寸与脐中的中点即为1.5寸。\n3. 脐中下1.5寸，前正中线上取穴。","op":"直刺1～1.5寸；多用灸法。孕妇慎用。"},{"no":166,"name":"神阙","meridian":"任脉","code":"CV 8","special":"","loc":"在脐区，脐中央。","steps":"仰卧位；当脐中央处。","op":"一般不针，多用艾条灸或艾炷隔盐灸法。"},{"no":167,"name":"下脘","meridian":"任脉","code":"CV 10","special":"","loc":"在上腹部，脐中上2寸，前正中线上。","steps":"1. 仰卧位。\n2. 找脐中上2寸：脐中至胸剑联合为8寸，折半为4寸，4寸再折半即为2寸。\n3. 脐中上2寸，前正中线上取穴。","op":"直刺1～1.5寸。"},{"no":168,"name":"建里","meridian":"任脉","code":"CV 11","special":"","loc":"在上腹部，脐中上3寸，前正中线上。","steps":"1. 仰卧位。\n2. 找脐中上3寸：脐中至胸剑联合为8寸，折半为4寸（中脘穴），4寸再折半为2寸即（下脘穴），4寸与2寸中点即为3寸。\n3. 脐中上3寸，前正中线上取穴。","op":"直刺1～1.5寸。"},{"no":169,"name":"中脘","meridian":"任脉","code":"CV 12","special":"胃之募穴，八会穴之腑会","loc":"在上腹部，脐中上4寸，前正中线上。","steps":"1. 仰卧位。\n2. 找脐中上4寸：脐中至胸剑联合为8寸，折半即为4寸。\n3. 脐中上4寸，前正中线上取穴。","op":"直刺1～1.5寸。"},{"no":170,"name":"上脘","meridian":"任脉","code":"CV 13","special":"","loc":"在上腹部，脐中上5寸，前正中线上。","steps":"1. 仰卧位。\n2. 找脐中上5寸：脐中至胸剑联合为8寸，折半为4寸（中脘穴），4寸折半即2寸（巨阙穴：脐上6寸），4寸与6寸中点即为5寸。\n3. 脐中上5寸，前正中线上取穴。","op":"直刺1～1.5寸。"},{"no":171,"name":"膻中","meridian":"任脉","code":"CV 17","special":"心包之募穴，八会穴之气会","loc":"在胸部，横平第4肋间隙，前正中线上。","steps":"1. 仰卧位。\n2. 取两乳头连线与前正中线的交点上即为本穴。（男性乳头平第4肋间隙）","op":"平刺0.3～0.5寸。"},{"no":172,"name":"天突","meridian":"任脉","code":"CV 22","special":"","loc":"在颈前区，胸骨上窝中央，前正中线上。","steps":"1. 正坐仰靠或仰卧位。\n2. 找胸骨上窝：触摸胸骨上缘凹陷即胸骨上窝。\n3. 在前正中线上，胸骨上窝中央取穴。","op":"先直刺0.2～0.3寸，然后将针尖向下，紧靠胸骨柄后方刺入1～1.5寸。必须严格掌握针刺的角度与深度，以防刺伤肺和有关动、静脉。"},{"no":173,"name":"廉泉","meridian":"任脉","code":"CV 23","special":"","loc":"在颈前区，喉结上方，舌骨上缘凹陷中，前正中线上。","steps":"1. 仰靠坐位或仰卧位。\n2. 头微仰，找舌骨上缘：将食指放在下颌骨正中向下滑动挡手处，吞咽时上下移动的骨即是舌骨。\n3. 在舌骨上缘前正中线上取穴。","op":"向舌根斜刺0.5～0.8寸。"},{"no":174,"name":"承浆","meridian":"任脉","code":"CV 24","special":"","loc":"在面部，颏唇沟的正中凹陷处。","steps":"1. 正坐仰靠或仰卧位。\n2. 颏唇沟的正中凹陷处取穴。","op":"斜刺0.3～0.5寸。"},{"no":175,"name":"四神聪","meridian":"经外奇穴","code":"EX-HN1","special":"","loc":"在头部，百会前后左右各旁开1寸，共4穴。","steps":"1. 正坐位或仰卧位.\n2. 在头顶部，先找百会穴。\n3. 当百会穴前后左右各1寸（患者拇指同身寸）处，共4穴。","op":"平刺0.5～0.8寸。"},{"no":176,"name":"太阳","meridian":"经外奇穴","code":"EX-HN5","special":"","loc":"在头部，当眉梢与目外眦之间，向后约1横指的凹陷中。","steps":"1. 正坐位或仰卧位。\n2. 在颞部，当眉梢与目外眦之间，向后约一横指的凹陷处取穴。\n注：一定要在凹陷处。","op":"直刺或斜刺0.3～0.5寸；或点刺出血。"},{"no":177,"name":"球后","meridian":"经外奇穴","code":"EX-HN7","special":"","loc":"在面部，眶下缘外1/4与内3/4交界处。","steps":"1. 仰卧位。\n2. 目正视，以瞳孔为中心，将眼眶下缘4等分，在外1/4与内3/4交点处，眶骨上缘眼球下缘取穴。","op":"轻推眼球向上，向眶下缘缓慢直刺0.5～1.5寸，不提插。"},{"no":178,"name":"金津","meridian":"经外奇穴","code":"EX-HN12","special":"","loc":"在口腔内，舌下系带的静脉上。左侧为金津，右侧为玉液。","steps":"1. 正坐仰靠位，张口舌头上翘。\n2. 暴露舌下系带与舌下静脉，左侧静脉为金津穴，右侧静脉为玉液穴。","op":"点刺出血。"},{"no":179,"name":"玉液","meridian":"经外奇穴","code":"EX-HN13","special":"","loc":"在口腔内，舌下系带的静脉上。左侧为金津，右侧为玉液。","steps":"1. 正坐仰靠位，张口舌头上翘。\n2. 暴露舌下系带与舌下静脉，左侧静脉为金津穴，右侧静脉为玉液穴。","op":"点刺出血。"},{"no":180,"name":"夹承浆","meridian":"经外奇穴","code":"EX-HN","special":"","loc":"在面部，承浆穴左右各旁开1寸。","steps":"1. 正坐位或仰卧位。\n2. 在面部，先找承浆穴（颏唇沟的正中凹陷处）。\n3. 承浆穴左右旁开1寸（患者拇指同身寸）处取穴。","op":"斜刺或平刺0.3～0.5寸。"},{"no":181,"name":"牵正","meridian":"经外奇穴","code":"EX-HN","special":"","loc":"在面部，耳垂前0.5～1寸的压痛处。","steps":"1. 正坐位或仰卧位。\n2. 在面颊部， 耳垂前0.5至1寸处压痛点取穴。","op":"向前斜刺0.5～0.8寸。"},{"no":182,"name":"翳明","meridian":"经外奇穴","code":"EX-HN14","special":"","loc":"在颈部，翳风后1寸。","steps":"1. 正坐位或侧卧位。\n2. 先确定翳风穴位置。（耳垂后方，乳突下端前方凹陷中）\n3. 翳风穴后1寸（患者拇指同身寸）取穴。","op":"直刺0.5～1寸；可灸。"},{"no":183,"name":"安眠","meridian":"经外奇穴","code":"EX-HN","special":"","loc":"在项部，在翳风穴与风池穴连线之中点处。","steps":"1. 正坐俯伏。\n2. 先确定翳风穴与风池穴的位置。\n3. 两穴连线中点处取穴。\n（ 翳风穴：乳突前下方与下颌角之间的凹陷处。）（风池穴：发际之上，当胸锁乳突肌与斜方肌上端之间的凹陷中取穴。）","op":"直刺0.8～1.2寸。"},{"no":184,"name":"子宫","meridian":"经外奇穴","code":"EX-CA1","special":"","loc":"在下腹部，脐中下4寸，前正中线旁开3寸。","steps":"1. 仰卧位。\n2. 先找脐中下4寸（中极）。（参考中极穴取法）\n3. 找前正中线旁开3寸：两乳头间为8寸，折半为4寸，再折半为2寸，4寸与2寸的中点即为3寸。（可在两乳头间先取3寸，然后用量绳对比）\n4. 脐中下4寸，腹正中线上旁开3寸取穴。","op":"直刺0.8～1.2寸。"},{"no":185,"name":"三角灸","meridian":"经外奇穴","code":"EX-CA","special":"","loc":"在下腹部，以患者两口角之间的长度为一边，作等边三角形，将顶角置于患者脐心，底边呈水平线，两底角处取穴。","steps":"1. 仰卧位。\n2. 在下腹部，以患者两口角之间的长度为一边，作等边三角形；将顶角置于患者脐心，底边呈水平线，两底角处取穴。","op":"艾炷灸5～7壮。"},{"no":186,"name":"定喘","meridian":"经外奇穴","code":"EX-B1","special":"","loc":"在脊柱区，横平第7颈椎棘突下，后正中线旁开0.5寸。","steps":"1. 俯坐位。\n2. 先找大椎穴：在第7颈椎棘突下。\n3. 横平第7颈椎棘突下旁开0.5寸（患者拇指同身寸）处取穴。","op":"直刺0.5～0.8寸。"},{"no":187,"name":"夹脊","meridian":"经外奇穴","code":"EX-B2","special":"","loc":"在脊柱区，第1胸椎至第5腰椎棘突下两侧，后正中线旁开0.5寸，一侧17穴。","steps":"1. 俯坐位或俯卧位。\n2. 先找第7颈椎，往下找第1胸椎棘突，依次找到第5腰椎棘突。\n3. 在第1胸椎至第5腰椎棘突下两侧，后正中线旁开0.5寸（患者拇指同身寸）处取穴。\n注：（找第1胸椎及第4腰椎的夹脊穴即可）","op":"12.5：直刺0.3～0.5寸，或用梅花针叩刺。13.5&14.5：根据部位的不同直刺0.3～1寸，或用梅花针叩刺。"},{"no":188,"name":"胃脘下俞","meridian":"经外奇穴","code":"EX-B3","special":"","loc":"在脊柱区，横平第8胸椎棘突下，后正中线旁开1.5寸。","steps":"1. 俯卧位，手臂下垂。\n2. 找第8胸椎：肩胛骨下角及与下角连线平齐第7胸椎棘突，往下触摸，找第8胸椎棘突。\n3. 后正中线旁开1.5寸：后正中线至肩胛骨内侧缘为3寸，折半为1.5寸。\n4. 在第8胸椎棘突下，后正中线旁开1.5寸处取穴。","op":"斜刺0.3～0.5寸。"},{"no":189,"name":"腰眼","meridian":"经外奇穴","code":"EX-B7","special":"","loc":"在腰区，横平第4腰椎棘突下，后正中线旁开约3.5寸凹陷中。","steps":"1. 俯卧位。\n2. 找第4腰椎棘突：两髂嵴高点连线平第4腰椎棘突。\n3. 后正中线旁开约3.5寸：两 肩胛骨内侧缘至后正中线即为3寸，加0.5寸（患者拇指同身寸）即3.5寸。\n4. 横平第4腰椎棘突下，后正中线旁开3.5寸处取穴。","op":"直刺1～1.5寸。"},{"no":190,"name":"肩前","meridian":"经外奇穴","code":"EX-UE","special":"","loc":"在肩前区，正坐垂肩，腋前皱襞顶端与肩髃连线的中点。","steps":"1.   正坐位，垂肩。\n2.   上臂内收，暴露腋前纹头顶端。\n3.   确定肩髃穴位置。\n4.   在腋前纹头与肩髃穴连线中点取穴。","op":"直刺1～1.5寸。"},{"no":191,"name":"二白","meridian":"经外奇穴","code":"EX-UE2","special":"","loc":"在前臂前区，腕掌侧远端横纹上4寸，桡侧腕屈肌腱的两侧，一肢2穴。","steps":"1.   正坐位或仰卧位，伸臂仰掌。\n2.   腕掌侧远端横纹至肘横纹为12寸，3等分取4寸。\n3.   握拳屈腕显露桡侧腕屈肌腱。\n4.   在腕掌侧远端横纹上4寸，桡侧腕屈肌腱内外两侧处取穴。","op":"直刺0.5～0.8寸。"},{"no":192,"name":"腰痛点","meridian":"经外奇穴","code":"EX-UE7","special":"","loc":"在手背，第2、3掌骨及第4、5掌骨之间，腕背侧横纹远端与掌指关节中点处，一手2穴。","steps":"1. 正坐位或卧位，俯掌。\n2. 微握拳，手背微屈，显露腕背侧远端横纹及掌指关节。\n3. 在第2、3及4、5掌指关节最高点之间与腕背侧远端横纹连线的中点，即2、3掌骨间与4、5掌骨间取穴。","op":"由两侧向掌中斜刺0.5～0.8寸。"},{"no":193,"name":"外劳宫","meridian":"经外奇穴","code":"EX-UE8","special":"","loc":"在手背，第2、3掌骨间，掌指关节后0.5寸（指寸）凹陷中。","steps":"1. 正坐位或卧位，俯掌。\n2. 微握拳显露掌指关节。\n3. 在第2、3掌指关节后0.5寸（患者拇指同身寸），第2、3掌骨间凹陷中取穴。","op":"直刺0.5～0.8寸。"},{"no":194,"name":"八邪","meridian":"经外奇穴","code":"EX-UE9","special":"","loc":"在手背，第1～5指间，指蹼缘后方赤白肉际处，左右共8穴。","steps":"1. 正坐位或仰卧位，俯掌。\n2. 手指稍分开，显露赤白肉际。\n3. 在1～5指间指蹼缘后方赤白肉际处取穴，左右共8穴。","op":"斜刺0.5～0.8寸；或点刺出血。"},{"no":195,"name":"四缝","meridian":"经外奇穴","code":"EX-UE10","special":"","loc":"在手指，第2～5指掌面的近侧指间关节横纹的中央，一手4穴。","steps":"1. 正坐位或仰卧位，仰掌。\n2. 找近端指关节掌面横纹中央。\n3. 在第2～5指近端指关节掌面横纹中央取穴。","op":"点刺出血或挤出少许黄色透明黏液。"},{"no":196,"name":"十宣","meridian":"经外奇穴","code":"EX-UE11","special":"","loc":"在手指，十指尖端，距指甲游离缘0.1寸（指寸），左右共10穴。","steps":"1. 正坐位或仰卧位。\n2. 微屈指，十指尖端，距指甲游离缘0.1寸（指寸），左右共10穴。","op":"浅刺0.1～0.2寸；或点刺出血。"},{"no":197,"name":"鹤顶","meridian":"经外奇穴","code":"EX-LE2","special":"","loc":"在膝前区，髌底中点的上方凹陷中。","steps":"1. 正坐位或仰卧位，屈膝。\n2. 触摸寻找髌骨底（髌骨上方骨边）中点。\n3. 在髌底中点上方凹陷处取穴。","op":"直刺0.8～1寸。"},{"no":198,"name":"百虫窝","meridian":"经外奇穴","code":"EX-LE3","special":"","loc":"在股前区，髌底内侧端上3寸。","steps":"1. 正坐位屈膝或仰卧位，屈膝。\n2. 触摸寻找髌骨底内侧端（即内上缘）。\n3. 在髌骨底内侧端上3寸取穴。（参照患者手指用一夫法定3寸）","op":"直刺1.5～2寸。"},{"no":199,"name":"内膝眼","meridian":"经外奇穴","code":"EX-LE4","special":"","loc":"在膝部，髌韧带内侧凹陷处的中央。","steps":"1. 正坐位或仰卧位，屈膝。\n2. 触摸髌韧带及韧带内侧的凹陷。\n3. 在凹陷处的中央处取穴。","op":"12.5：向膝中斜刺0.5～1寸，或透刺对侧膝眼。13.5&14.5：向膝中斜刺0.5～1寸，或透刺犊鼻。"},{"no":200,"name":"胆囊","meridian":"经外奇穴","code":"EX-LE6","special":"","loc":"在小腿外侧，腓骨小头直下2寸。","steps":"1. 正坐位或仰卧位。\n2. 找腓骨小头：四肢并拢，从外踝尖沿腓骨向上滑动至膝关节外下方，可触及圆形小骨，即为腓骨小头。\n3. 腓骨小头直下2寸（参照患者手指用一夫法取3寸，3等分找2寸）取穴。","op":"直刺1～2寸。"},{"no":201,"name":"阑尾","meridian":"经外奇穴","code":"EX-LE7","special":"","loc":"在小腿外侧，髌韧带外侧凹陷下5寸，胫骨前嵴外一横指（中指）。","steps":"1. 正坐垂足或仰卧位屈膝。\n2. 先找髌韧带外侧凹陷（犊鼻）。\n3. 再找髌韧带下5寸：腘横纹至外踝尖为16寸，折半为8寸，8寸折半为4寸，4寸加1寸（患者拇指同身寸）即为5寸。\n4. 在犊鼻下5寸，胫骨前嵴外一横指（患者中指）处取穴。","op":"直刺1.5～2寸。"},{"no":202,"name":"八风","meridian":"经外奇穴","code":"EX-LE10","special":"","loc":"在足背，第1～5趾间，趾蹼缘后方赤白肉际处，左右共8穴。","steps":"1.   仰卧位。\n2.   足趾并拢，显露趾蹼缘后方纹头。\n3.   足趾稍分开，显露赤白肉际。\n4.   在1~5趾间赤白肉际处取穴，左右共8穴。","op":"斜刺0.5～0.8寸；或点刺出血。"}];
+const MER = [
+ ["手太阴肺经","LU","肺",205],["手阳明大肠经","LI","大肠",55],["足阳明胃经","ST","胃",75],["足太阴脾经","SP","脾",95],
+ ["手少阴心经","HT","心",25],["手太阳小肠经","SI","小肠",350],["足太阳膀胱经","BL","膀胱",235],["足少阴肾经","KI","肾",265],
+ ["手厥阴心包经","PC","心包",330],["手少阳三焦经","TE","三焦",300],["足少阳胆经","GB","胆",135],["足厥阴肝经","LR","肝",160],
+ ["督脉","GV","督",280],["任脉","CV","任",185],["经外奇穴","EX","奇穴",60]];
+const HUE = Object.fromEntries(MER.map(m=>[m[0],m[3]]));
+const GUDU = [
+ ["头面部","前发际正中至后发际正中","12寸",""],["头面部","眉间（印堂）至前发际正中","3寸",""],["头面部","两额角发际（头维）之间","9寸",""],["头面部","耳后两乳突（完骨）之间","9寸",""],
+ ["胸腹胁部","胸骨上窝（天突）至剑胸结合中点（岐骨）","9寸",""],["胸腹胁部","剑胸结合中点（岐骨）至脐中","8寸",""],
+ ["胸腹胁部","脐中至耻骨联合上缘（曲骨）","5寸","折半为2.5寸，加0.5寸至3寸取关元；脐中与关元之间取气海；关元与耻骨联合上缘之间取中极。"],
+ ["胸腹胁部","两肩胛骨喙突内侧缘之间","12寸",""],["胸腹胁部","两乳头之间","8寸","也可取锁骨胸骨头至锁骨肩峰端为8寸。"],
+ ["背腰部","肩胛骨内侧缘至后正中线","3寸","两肩胛冈内侧端之间为6寸，折半为3寸，再折半即为1.5寸。"],
+ ["上肢部","腋前、后纹头至肘横纹（平尺骨鹰嘴）","9寸",""],["上肢部","肘横纹（平尺骨鹰嘴）至腕掌（背）侧远端横纹","12寸",""],
+ ["下肢部","耻骨联合上缘至髌底","18寸",""],["下肢部","髌底至髌尖","2寸",""],["下肢部","髌尖（膝中）至内踝尖","15寸",""],
+ ["下肢部","胫骨内侧髁下方至内踝尖","13寸","先减1寸（拇指同身寸），再分12等份。"],
+ ["下肢部","股骨大转子至腘横纹（平髌尖）","19寸","先减1寸（拇指同身寸），再分18等份。"],
+ ["下肢部","臀沟至腘横纹","14寸",""],["下肢部","腘横纹（平髌尖）至外踝尖","16寸",""],["下肢部","内踝尖至足底","3寸",""]];
+
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const shuffle = a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const pick = (a,n)=>shuffle(a).slice(0,n);
+const store = {get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+function toast(t){const el=$("#toast");el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,1800)}
+const mtag = m=>`<span class="mtag" style="--h:${HUE[m]}">${esc(m)}</span>`;
+const region = p=>{const m=p.loc.match(/^在([^，。；]+)/);return m?m[1]:""};
+const COARSE=[["面","头","耳","口腔","项"],["颈"],["胸","腋"],["腹","脐","会阴"],["脊柱","背","腰","骶","肩胛","臀"],["肩","三角肌","臂"],["肘","前臂","腕"],["手","掌","指"],["股","膝"],["小腿","踝","跟"],["足","跖","趾"]];
+const coarse = r=>{for(let i=0;i<COARSE.length;i++) if(COARSE[i].some(k=>r.includes(k))) return i; return -1};
+P.forEach(p=>{p.region=region(p);p.coarse=coarse(p.region)});
+
+const CLOZE_RE=/(\d+(?:\.\d+)?(?:[～~]\d+(?:\.\d+)?)?寸|第\d+(?:、\d+)?(?:肋间隙|肋|胸椎|腰椎|颈椎|骶后孔|掌骨|跖骨|趾|指)|\d+\/\d+)/g;
+/* ---------- scope ---------- */
+let scope = store.get("acu.scope","all");
+function inScope(){return scope==="all"?P:P.filter(p=>p.meridian===scope)}
+function renderScope(){
+  const el=$("#scope");
+  el.innerHTML=`<button class="chip all" data-s="all" aria-pressed="${scope==="all"}">全部<span class="n">${P.length}</span></button>`+
+   MER.map(m=>`<button class="chip" style="--h:${m[3]}" data-s="${m[0]}" aria-pressed="${scope===m[0]}">${m[2]}${m[1]==="EX"?"":"经"}<span class="n">${P.filter(p=>p.meridian===m[0]).length}</span></button>`).join("");
+  el.querySelectorAll("button").forEach(b=>b.onclick=()=>{scope=b.dataset.s;store.set("acu.scope",scope);renderScope();refresh()});
+}
+
+/* ---------- SRS ---------- */
+const DAY=864e5, IV=[0,1,3,7,16,35];
+let srs = store.get("acu.srs",{});
+const saveSrs=()=>store.set("acu.srs",srs);
+const boxOf=p=>srs[p.no]?srs[p.no].b:-1;
+function grade(p,g){ // g: 0 again,1 hard,2 good
+  const s=srs[p.no]||{b:0,d:0}; const now=Date.now();
+  if(g===0){s.b=0;s.d=now}
+  else if(g===1){s.b=Math.max(1,s.b);s.d=now+DAY}
+  else {s.b=Math.min(5,s.b+1);s.d=now+IV[s.b]*DAY}
+  srs[p.no]=s; saveSrs();
+}
+
+/* ---------- browse ---------- */
+function highlightNums(t){return esc(t).replace(CLOZE_RE,"<mark>$1</mark>")}
+function pointBody(p,full=true){
+  return `<div class="row">${mtag(p.meridian)}<span class="code">${esc(p.code)}</span>${p.special?`<span class="special">${esc(p.special)}</span>`:""}</div>
+  <div class="field"><span class="lbl">定位</span><p class="locbig">${highlightNums(p.loc)}</p></div>
+  ${full?`<details class="steps"><summary>取穴步骤</summary><p>${esc(p.steps)}</p></details>
+  <details class="steps"><summary>操作</summary><p>${esc(p.op)}</p></details>`:""}`;
+}
+function renderBrowse(){
+  const q=$("#q").value.trim().toLowerCase().replace(/\s+/g,"");
+  const list=inScope().filter(p=>!q||(p.name+p.code+p.loc+p.special+p.meridian).toLowerCase().replace(/\s+/g,"").includes(q));
+  $("#bcount").textContent=`${list.length} 个穴位 · 黄色标出的是定位中的数字和骨性标志`;
+  let html="",last="";
+  $("#plist").innerHTML=list.map(p=>`<details class="pt"><summary><span class="no">${p.no}</span><span class="nm">${esc(p.name)}</span><span class="row" style="gap:8px"><span class="code">${esc(p.code)}</span><span class="dot b${Math.max(0,boxOf(p))}" title="记忆程度"></span></span><span class="loc1">${esc(p.loc)}</span></summary><div class="body">${pointBody(p)}</div></details>`).join("")||`<div style="padding:16px" class="muted">没有找到匹配的穴位。</div>`;
+}
+$("#q").addEventListener("input",renderBrowse);
+
+/* ---------- flashcards ---------- */
+let session=null;
+function cardStats(){
+  const L=inScope(),now=Date.now();
+  const nw=L.filter(p=>!srs[p.no]).length, due=L.filter(p=>srs[p.no]&&srs[p.no].d<=now).length, ms=L.filter(p=>srs[p.no]&&srs[p.no].b>=3).length;
+  $("#cstats").innerHTML=`<div class="stat"><b>${due}</b><span>今天待复习</span></div><div class="stat"><b>${nw}</b><span>未学</span></div><div class="stat"><b>${ms}<span style="font-size:.9rem;color:var(--muted)">/${L.length}</span></b><span>已熟记</span></div>`;
+  return {due,nw};
+}
+function startCards(){
+  const L=inScope(),now=Date.now(),n=+$("#newPer").value;
+  const due=shuffle(L.filter(p=>srs[p.no]&&srs[p.no].d<=now));
+  const nw=L.filter(p=>!srs[p.no]).slice(0,n);
+  const q=[...due,...nw];
+  if(!q.length){$("#cardArea").innerHTML=`<div class="panel">这个范围今天没有要复习的了。可以换一条经，或者去做选择测验。</div>`;return}
+  session={q,i:0,total:q.length,done:0,flipped:false};
+  showCard();
+}
+function showCard(){
+  const s=session; if(!s) return;
+  if(s.i>=s.q.length){$("#cardArea").innerHTML=`<div class="panel stack"><h2>本轮完成</h2><p class="muted" style="margin:0">共复习 ${s.total} 个穴位。明天再来，到期的会自动出现。</p></div>`;session=null;cardStats();renderBrowse();return}
+  const p=s.q[s.i];
+  $("#cardArea").innerHTML=`<div class="progress"><i style="width:${s.done/s.total*100}%"></i></div>
+  <div class="card"><div class="prompt">${srs[p.no]?"复习":"新穴位"} · 说出归经和定位</div><div class="big">${esc(p.name)}</div>
+  <div id="back" ${s.flipped?"":"hidden"} class="stack">${pointBody(p)}</div>
+  <div style="margin-top:auto">${s.flipped?`<div class="rate"><button class="btn again" data-g="0">忘了<small>本轮再来</small></button><button class="btn hard" data-g="1">模糊<small>明天</small></button><button class="btn good" data-g="2">记得<small>${IV[Math.min(5,Math.max(0,boxOf(p))+1)]} 天后</small></button></div>`:`<button class="btn primary" id="flip" style="width:100%;padding:12px">翻面</button>`}</div></div>`;
+  if(!s.flipped) $("#flip").onclick=()=>{s.flipped=true;showCard()};
+  else $("#cardArea").querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{
+    const g=+b.dataset.g; grade(p,g); s.flipped=false;
+    if(g===0){s.q.splice(Math.min(s.q.length,s.i+4),0,p)} else s.done++;
+    s.i++; showCard(); cardStats();
+  });
+}
+$("#cstart").onclick=startCards;
+
+/* ---------- quiz ---------- */
+let qtype="mer";
+$("#qtype").querySelectorAll("button").forEach(b=>b.onclick=()=>{qtype=b.dataset.v;$("#qtype").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+function distractors(p,n){
+  const others=P.filter(x=>x.no!==p.no&&x.loc!==p.loc);
+  let pool=others.filter(x=>x.region===p.region);
+  if(pool.length<n) pool=pool.concat(pick(others.filter(x=>x.coarse===p.coarse&&x.region!==p.region),n-pool.length));
+  if(pool.length<n) pool=pool.concat(pick(others.filter(x=>!pool.includes(x)),n-pool.length));
+  return pick(pool,n);
+}
+function makeQ(p,t){
+  if(t==="mix") t=["mer","name2loc","loc2name"][Math.random()*3|0];
+  if(t==="mer"){
+    const hand=p.meridian[0];
+    let opts=MER.map(m=>m[0]).filter(m=>m!==p.meridian);
+    const same=opts.filter(m=>m[0]===hand), rest=opts.filter(m=>m[0]!==hand);
+    opts=pick(same,2).concat(pick(rest,1));
+    return {p,t,stem:`<div class="lbl">归经</div><div class="big" style="font-family:var(--f-display);font-size:2.2rem;font-weight:700">${esc(p.name)}</div><div class="muted">属于哪条经？</div>`,
+      opts:shuffle([p.meridian,...opts]).map(m=>({html:mtag(m),ok:m===p.meridian}))};
+  }
+  const ds=distractors(p,3), all=shuffle([p,...ds]);
+  if(t==="name2loc") return {p,t,stem:`<div class="lbl">定位</div><div style="font-family:var(--f-display);font-size:2.2rem;font-weight:700">${esc(p.name)}</div><div class="muted">${mtag(p.meridian)} 的定位是？</div>`,
+      opts:all.map(x=>({html:esc(x.loc),ok:x===p}))};
+  return {p,t,stem:`<div class="lbl">这是哪个穴位</div><div class="qtext">${esc(p.loc)}</div>`,
+      opts:all.map(x=>({html:`<span class="nmopt">${esc(x.name)}</span> <span class="code">${esc(x.code)}</span>`,ok:x===p}))};
+}
+let quiz=null;
+function startQuiz(){
+  const L=inScope(); if(L.length<2){toast("范围太小");return}
+  quiz={qs:pick(L,Math.min(10,L.length)).map(p=>makeQ(p,qtype)),i:0,right:0,wrong:[]};
+  $("#quizSetup").hidden=true; showQ(); window.scrollTo(0,0);
+}
+function showQ(){
+  const z=quiz;
+  if(z.i>=z.qs.length){
+    $("#quizArea").innerHTML=`<div class="panel stack"><div class="lbl">得分</div><div class="score">${z.right} / ${z.qs.length}</div>
+    ${z.wrong.length?`<div class="lbl">需要再看的穴位（已加入闪卡）</div>${z.wrong.map(p=>`<div class="panel stack" style="background:var(--sunk)"><div><span style="font-family:var(--f-display);font-size:1.2rem;font-weight:700">${esc(p.name)}</span></div>${pointBody(p,false)}</div>`).join("")}`:`<p style="margin:0">全对！</p>`}
+    <div class="row"><button class="btn primary" id="qagain">再来 10 题</button><button class="btn" id="qback">换题型</button></div></div>`;
+    $("#qagain").onclick=startQuiz; $("#qback").onclick=()=>{$("#quizSetup").hidden=false;$("#quizArea").innerHTML=""};
+    return;
+  }
+  const q=z.qs[z.i];
+  $("#quizArea").innerHTML=`<div class="progress"><i style="width:${z.i/z.qs.length*100}%"></i></div><div class="panel stack"><div class="muted code">第 ${z.i+1} / ${z.qs.length} 题</div>${q.stem}<div class="opts">${q.opts.map((o,i)=>`<button class="opt" data-i="${i}">${o.html}</button>`).join("")}</div><div id="qfb"></div></div>`;
+  const bs=$("#quizArea").querySelectorAll(".opt");
+  bs.forEach(b=>b.onclick=()=>{
+    const o=q.opts[+b.dataset.i];
+    bs.forEach((x,i)=>{x.disabled=true;if(q.opts[i].ok)x.classList.add("right")});
+    if(o.ok) z.right++; else {b.classList.add("wrong");z.wrong.push(q.p);grade(q.p,0)}
+    $("#qfb").innerHTML=`<div class="stack" style="margin-top:4px">${o.ok?"":`<div class="special">正确答案：${esc(q.p.name)} · ${esc(q.p.meridian)}</div>`}<div class="muted" style="font-size:.9rem">${esc(q.p.name)}：${esc(q.p.loc)}</div><button class="btn primary" id="qnext">下一题</button></div>`;
+    $("#qnext").onclick=()=>{z.i++;showQ()}; $("#qnext").focus();
+  });
+}
+$("#qstart").onclick=startQuiz;
+
+/* ---------- cloze ---------- */
+const _unused=/(\d+(?:\.\d+)?(?:[～~]\d+(?:\.\d+)?)?寸|第\d+(?:、\d+)?(?:肋间隙|肋|胸椎|腰椎|颈椎|骶后孔|掌骨|跖骨|趾|指)|\d+\/\d+)/g;
+const norm=s=>s.replace(/\s+/g,"").replace(/~/g,"～").replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-65248)).replace(/．/g,".");
+function clozeNext(){
+  const L=inScope().filter(p=>p.loc.split(CLOZE_RE).length>1);
+  if(!L.length){$("#clozeArea").innerHTML=`<div class="panel">这个范围的定位里没有数字可填。换一条经试试。</div>`;return}
+  const due=L.filter(p=>!srs[p.no]||srs[p.no].b<3);
+  const p=pick(due.length?due:L,1)[0];
+  const parts=p.loc.split(CLOZE_RE); const answers=[];
+  let html="";
+  parts.forEach((s,i)=>{ if(i%2){answers.push(s);const unit=s.endsWith("寸")?"寸":"";const core=unit?s.slice(0,-1):s;
+      html+=`<input data-a="${esc(core)}" aria-label="空格 ${answers.length}" autocomplete="off" inputmode="${/^第/.test(core)?"text":"decimal"}">${unit}`} else html+=esc(s) });
+  $("#clozeArea").innerHTML=`<div class="panel stack"><div class="row"><span style="font-family:var(--f-display);font-size:1.6rem;font-weight:700">${esc(p.name)}</span>${mtag(p.meridian)}<span class="code">${esc(p.code)}</span></div>
+   <div class="cloze qtext" style="line-height:2.2">${html}</div>
+   <div class="row"><button class="btn primary" id="ccheck">核对</button><button class="btn" id="cskip">下一个</button></div><div id="cfb"></div></div>`;
+  const ins=[...$("#clozeArea").querySelectorAll("input")]; ins[0].focus();
+  ins.forEach((el,i)=>el.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault(); if(i<ins.length-1) ins[i+1].focus(); else $("#ccheck").click()}}));
+  $("#ccheck").onclick=()=>{
+    let ok=0; ins.forEach(el=>{const a=el.dataset.a, v=norm(el.value); const good=norm(a)===v||norm(a)===v.replace(/寸$/,"");
+      el.classList.toggle("ok",good);el.classList.toggle("no",!good); if(good) ok++;
+      if(!good&&!el.nextElementSibling?.classList?.contains("ans")) el.insertAdjacentHTML("afterend",`<span class="ans">${esc(a)}</span>`)});
+    const all=ok===ins.length; grade(p,all?2:0);
+    $("#cfb").innerHTML=`<div class="${all?"":"special"}" style="${all?"color:var(--good)":""}">${all?"全部正确":`${ok} / ${ins.length} 正确`}</div>`;
+    $("#ccheck").disabled=true; $("#cskip").textContent="下一个"; $("#cskip").classList.add("primary"); $("#cskip").focus();
+  };
+  $("#cskip").onclick=clozeNext;
+}
+
+/* ---------- recall ---------- */
+const strip=s=>s.replace(/[\s，。、；：（）()“”"',.;:]/g,"").replace(/~/g,"～");
+function lcsDiff(target,input){ // returns array of [char, matched] for target, and count
+  const a=[...target], b=[...strip(input)], n=a.length, m=b.length;
+  const dp=Array.from({length:n+1},()=>new Uint16Array(m+1));
+  for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--)dp[i][j]=a[i]===b[j]?dp[i+1][j+1]+1:Math.max(dp[i+1][j],dp[i][j+1]);
+  const hit=new Array(n).fill(false); let i=0,j=0;
+  while(i<n&&j<m){if(a[i]===b[j]){hit[i]=true;i++;j++}else if(dp[i+1][j]>=dp[i][j+1])i++;else j++}
+  return {hit,score:dp[0][0],len:n,extra:m-dp[0][0]};
+}
+function recallNext(){
+  const L=inScope(); const due=L.filter(p=>!srs[p.no]||srs[p.no].b<3);
+  const p=pick(due.length?due:L,1)[0];
+  $("#recallArea").innerHTML=`<div class="panel stack"><div style="font-family:var(--f-display);font-size:2rem;font-weight:700;letter-spacing:.06em">${esc(p.name)}</div>
+   <label class="field"><span class="lbl">归经</span><select id="rmer"><option value="">— 选择 —</option>${MER.map(m=>`<option>${m[0]}</option>`).join("")}</select></label>
+   <label class="field"><span class="lbl">定位</span><textarea id="rloc" placeholder="例：在前臂前区，腕掌侧远端横纹上7寸……"></textarea></label>
+   <div class="row"><button class="btn primary" id="rcheck">对比原文</button><button class="btn" id="rskip">换一个</button></div><div id="rfb" class="stack"></div></div>`;
+  $("#rcheck").onclick=()=>{
+    const merOk=$("#rmer").value===p.meridian;
+    // compare against punctuation-stripped target but render original
+    const orig=[...p.loc]; const keep=orig.map(c=>strip(c).length>0);
+    const tgt=orig.filter((c,i)=>keep[i]).join("");
+    const d=lcsDiff(tgt,$("#rloc").value);
+    let k=0; const html=orig.map((c,i)=>{if(!keep[i])return esc(c); const h=d.hit[k++]; return h?esc(c):`<span class="miss">${esc(c)}</span>`}).join("");
+    const pct=Math.round(d.score/d.len*100);
+    const good=merOk&&pct>=90&&d.extra<=3;
+    grade(p,good?2:(merOk&&pct>=70?1:0));
+    $("#rfb").innerHTML=`<div class="row" style="gap:16px"><div><div class="lbl">定位</div><div class="score">${pct}%</div></div><div><div class="lbl">归经</div><div style="font-size:1.1rem;font-weight:700;color:${merOk?"var(--good)":"var(--seal)"}">${merOk?"正确":"应为 "+esc(p.meridian)}</div></div></div>
+     <div class="field"><span class="lbl">原文（红色为漏写/写错）</span><p class="locbig diff">${html}</p></div>
+     ${d.extra>0?`<div class="muted" style="font-size:.85rem">另有 ${d.extra} 个字不在原文中。</div>`:""}
+     <details class="steps"><summary>取穴步骤</summary><p>${esc(p.steps)}</p></details>`;
+    $("#rskip").textContent="下一个"; $("#rskip").classList.add("primary");
+  };
+  $("#rskip").onclick=recallNext;
+}
+
+/* ---------- gudu ---------- */
+(function(){let g="",h="";GUDU.forEach(r=>{if(r[0]!==g){g=r[0];h+=`<tr class="grp"><td colspan="2">${r[0]}</td></tr>`}
+ h+=`<tr><td>${esc(r[1])}${r[3]?`<span class="note">${esc(r[3])}</span>`:""}</td><td class="cun">${r[2]}</td></tr>`});$("#gudu").innerHTML=h})();
+
+/* ---------- tabs ---------- */
+let tab=store.get("acu.tab","browse");
+function setTab(t){tab=t;store.set("acu.tab",t);
+  document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));
+  document.querySelectorAll("main>section").forEach(s=>s.hidden=s.id!=="tab-"+t);
+  $("#scope").hidden=(t==="gudu");
+  refresh(true);
+}
+function refresh(fromTab){
+  renderBrowse(); cardStats();
+  if(!fromTab){session=null;$("#cardArea").innerHTML="";quiz=null;$("#quizSetup").hidden=false;$("#quizArea").innerHTML=""}
+  if(tab==="cloze"&&(!fromTab||!$("#clozeArea").innerHTML)) clozeNext();
+  if(tab==="recall"&&(!fromTab||!$("#recallArea").innerHTML)) recallNext();
+}
+document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+$("#brandCount").textContent=`${P.length} 穴 · 14 经 + 经外奇穴`;
+renderScope(); setTab(tab);
+
+/* ---------- backup ---------- */
+$("#bexport").onclick=()=>{
+  const blob=new Blob([JSON.stringify({app:"acupoint-cards",v:1,date:new Date().toISOString(),srs},null,0)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`穴位进度-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);toast("已导出");
+};
+$("#bimport").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.srs)throw 0;srs=d.srs;saveSrs();refresh();toast("已导入进度")}catch(x){toast("文件格式不对，请选择导出的 .json 备份")}e.target.value=""};r.readAsText(f)};
+let resetArmed=false;
+$("#breset").onclick=()=>{if(!resetArmed){resetArmed=true;$("#breset").textContent="再按一次确认清空";setTimeout(()=>{resetArmed=false;$("#breset").textContent="清空进度"},3000);return}
+  srs={};saveSrs();refresh();resetArmed=false;$("#breset").textContent="清空进度";toast("进度已清空")};
+
+/* ---------- offline ---------- */
+if("serviceWorker" in navigator && location.protocol!=="file:"){
+  navigator.serviceWorker.register("sw.js").then(reg=>{
+    reg.addEventListener("updatefound",()=>{const w=reg.installing;w&&w.addEventListener("statechange",()=>{
+      if(w.state==="installed"&&navigator.serviceWorker.controller) toast("已更新，重新打开即可使用新版本")})});
+  }).catch(()=>{});
+}
+$("#ver").textContent="版本 2026.10.18 · "+(navigator.onLine?"在线":"离线");
+</script>
+</body>
+</html>
