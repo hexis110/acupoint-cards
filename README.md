@@ -1,6 +1,11 @@
 # 针灸穴位记忆卡
 
-A study app for the 202 acupoints in 《针灸穴位及取穴方法》. It covers 归经 and 定位 through flashcards, quizzes, fill-in-the-blank and written recall. It works offline and can be installed on iPad and Android.
+A study app for 《针灸学》Ⅰ. It works offline and can be installed on iPad and Android.
+
+- **腧穴:** 202 points from 《针灸穴位及取穴方法》, each with 定位, 操作 and 取穴步骤, plus 主治 from the 十四五 slides. Includes flashcards, quizzes (归经 / 定位 / 主治), number fill-ins, and written recall of 定位 + 操作. The 作业10穴 filter covers just the 10 points in the homework.
+- **特定穴:** tables for 五输穴, 原穴, 络穴, 郄穴, 背俞穴, 募穴, 下合穴, 八会穴 and 八脉交会穴, with hide-and-reveal practice and randomly generated questions.
+- **刺灸操作:** practice for the 操作叙述题 (针刺异常情况, 施灸 / 拔罐 / 三棱针 / 皮肤针 / 电针注意事项, 消毒, 宜忌), with section-by-section recall and written comparison.
+- **习题:** the 50 questions from the Ⅰ homework plus 24 Ⅰ-scope questions from the 重修班 homework, with answers, explanations and a wrong-answer list (错题本).
 
 ## Deploy to GitHub Pages
 1. Create a new repository on GitHub, for example `acupoint-cards`.

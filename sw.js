@@ -1,6 +1,6 @@
 // 离线缓存：应用文件预先缓存；Google 字体首次在线打开时缓存，之后离线可用。
 // 每次修改 index.html 后把 VERSION 改一下，用户下次打开就会拿到新版本。
-const VERSION = "2026.10.18";
+const VERSION = "2026.10.21";
 const APP = "acu-app-" + VERSION;
 const FONTS = "acu-fonts-v1";
 const SHELL = ["./", "index.html", "manifest.webmanifest",
